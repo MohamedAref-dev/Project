@@ -1,0 +1,2798 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>نظام إدارة العُهد الشخصية - لوحة المسؤول</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff',
+                            100: '#ede9fe',
+                            200: '#ddd6fe',
+                            300: '#c4b5fd',
+                            400: '#a78bfa',
+                            500: '#6e2d91',
+                            600: '#6a2a85',
+                            700: '#5e246f',
+                            800: '#521f5a',
+                            900: '#461a48',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Tajawal', 'sans-serif'],
+                    },
+                    animation: {
+                        'spin-slow': 'spin 2s linear infinite',
+                        'pulse-slow': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* رسالة تم الجرد */
+        #inventory-done-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: #10B981;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        /* رسالة تم الحذف */
+        #delete-success-message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 1000;
+            background-color: #EF4444;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: none;
+            animation: fadeInOut 3s ease-in-out;
+        }
+
+        @keyframes fadeInOut {
+            0% {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+
+            10% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            90% {
+                opacity: 1;
+                transform: translate(-50%, 0);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translate(-50%, -20px);
+            }
+        }
+
+        .chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+
+        .scanner-container {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+            background-color: #ddd;
+        }
+
+        .scanner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, rgba(109, 40, 217, 0.3) 0%, rgba(109, 40, 217, 0.1) 100%);
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        .scanner-frame {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 250px;
+            height: 250px;
+            border: 3px solid #6d28d9;
+            border-radius: 12px;
+            box-shadow: 0 0 0 2000px rgba(0, 0, 0, 0.5);
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .scanner-laser {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background-color: #EF4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.7);
+            animation: scanLaser 2s infinite;
+            z-index: 30;
+        }
+
+        @keyframes scanLaser {
+            0% {
+                top: 0;
+            }
+
+            50% {
+                top: 100%;
+            }
+
+            100% {
+                top: 0;
+            }
+        }
+
+        #video {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            display: none;
+        }
+
+        #camera-placeholder {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f0f0f0;
+            color: #6d28d9;
+            font-weight: bold;
+            border-radius: 8px;
+        }
+
+        .device-status-in-use {
+            background-color: #10B981;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .device-status-maintenance {
+            background-color: #F59E0B;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .device-status-scrapped {
+            background-color: #EF4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .inventory-checked {
+            background-color: #d1fae5;
+            border: 2px solid #10B981;
+        }
+
+        .animate-pop {
+            animation: pop 0.5s ease;
+        }
+
+        @keyframes pop {
+            0% {
+                transform: scale(0.95);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        /* Styles for the new reports section */
+        .mobile-card {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            background: white;
+            padding: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .mobile-scroll {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .mobile-table {
+                min-width: 800px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .btn-primary {
+            background-color: #6d28d9;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background-color: #5b21b6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-danger:hover {
+            background-color: #dc2626;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-success {
+            background-color: #10b981;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-success:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-warning {
+            background-color: #f59e0b;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-warning:hover {
+            background-color: #d97706;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        .table-row-highlight {
+            transition: background-color 0.3s ease;
+        }
+
+        .table-row-highlight:hover {
+            background-color: #f3f4f6;
+        }
+
+        .report-highlight {
+            animation: highlightReport 2s ease;
+        }
+
+        @keyframes highlightReport {
+            0% {
+                background-color: #dbeafe;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        /* أنماط الجرس والإشعارات */
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background-color: #EF4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .notification-btn {
+            position: relative;
+            transition: transform 0.2s;
+        }
+
+        .notification-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .notification-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* نافذة الإشعارات */
+        #notifications-container {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+            width: 320px;
+            z-index: 1000;
+            display: none;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 12px 15px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .notification-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .notification-content {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #999;
+            text-align: left;
+            margin-top: 3px;
+        }
+
+        /* Fixed modal scrolling */
+        .modal-content {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* تم إضافة أنماط جديدة للتقارير */
+        .stat-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        .filter-card {
+            background: linear-gradient(135deg, #f9fafb, #f3f4f6);
+        }
+
+        .report-section {
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .highlight-row {
+            animation: highlight 2s ease;
+        }
+
+        @keyframes highlight {
+            0% {
+                background-color: #dbeafe;
+            }
+
+            100% {
+                background-color: transparent;
+            }
+        }
+
+        .apply-filters-btn {
+            background: linear-gradient(to right, #6d28d9, #8b5cf6);
+        }
+
+        .scrapped-row {
+            background-color: #fff5f5;
+            border-left: 4px solid #ef4444;
+        }
+
+        .scrapped-row:hover {
+            background-color: #ffebeb;
+        }
+
+        .scrap-animation {
+            animation: scrapPulse 2s ease;
+        }
+
+        @keyframes scrapPulse {
+            0% {
+                background-color: #fee2e2;
+            }
+
+            50% {
+                background-color: #fecaca;
+            }
+
+            100% {
+                background-color: #fff5f5;
+            }
+        }
+
+        /* أنماط جديدة لمعلومات الجهاز */
+        .device-specs {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #4b5563;
+        }
+
+        .specs-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 min-h-screen">
+    <div id="inventory-done-message" class="font-bold">تم الجرد بنجاح</div>
+
+    <div id="delete-success-message" class="font-bold">تم تخريد الجهاز بنجاح</div>
+
+    <div id="notifications-container">
+        <div class="p-3 border-b bg-gray-50">
+            <h3 class="font-bold text-lg text-gray-800">الإشعارات</h3>
+        </div>
+        <div id="notifications-list">
+        </div>
+    </div>
+
+    <div class="fade-screen">
+        <div id="admin-dashboard" class="min-h-screen bg-gray-100">
+            <header class="bg-primary-800 text-white shadow-md">
+                <div
+                    class="container mx-auto px-4 py-3 flex flex-col sm:flex-row justify-between items-center text-center sm:text-right">
+                    <h1 class="text-xl sm:text-2xl font-bold mb-2 sm:mb-0">نظام إدارة العُهد الشخصية - لوحة التحكم</h1>
+                    <div class="flex items-center space-x-2 sm:space-x-4 space-x-reverse">
+                        <div class="relative">
+                            <button id="notification-btn"
+                                class="notification-btn text-white p-1 rounded-full hover:bg-primary-700 transition">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                    stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                                </svg>
+                                <span id="notification-badge" class="notification-badge">3</span>
+                            </button>
+                        </div>
+
+                        <span class="text-sm">مرحباً، مسؤول الصيانة</span>
+                        <button id="admin-logout-btn"
+                            class="bg-primary-900 hover:bg-primary-950 px-3 py-1 rounded-md text-xs sm:text-sm transition duration-300">
+                            تسجيل الخروج
+                        </button>
+                    </div>
+                </div>
+
+                <nav class="container mx-auto px-4 py-2">
+                    <ul
+                        class="flex flex-wrap justify-center sm:justify-start space-x-4 sm:space-x-6 space-x-reverse text-sm sm:text-base">
+                        <li class="mb-1 sm:mb-0">
+                            <button class="admin-nav-btn py-1 px-2 text-white border-b-2 border-white active"
+                                data-target="barcode">العهد</button>
+                        </li>
+                        <li class="mb-1 sm:mb-0">
+                            <button
+                                class="admin-nav-btn py-1 px-2 text-white opacity-70 hover:opacity-100 border-b-2 border-transparent"
+                                data-target="reports">التقارير والإحصائيات</button>
+                        </li>
+                    </ul>
+                </nav>
+            </header>
+
+            <main class="container mx-auto px-4 py-4 sm:py-6">
+                <div id="barcode-section" class="admin-section active">
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                        <h2 class="text-lg sm:text-xl font-bold text-primary-700 mb-3 sm:mb-4">مسح الباركود</h2>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+                            <div>
+                                <div class="scanner-container">
+                                    <div class="scanner-overlay"></div>
+                                    <div class="scanner-frame">
+                                        <div class="scanner-laser"></div>
+                                    </div>
+                                    <div id="camera-placeholder">
+                                        <span>الكاميرا ستظهر هنا عند التشغيل</span>
+                                    </div>
+                                    <video id="video" autoplay playsinline></video>
+                                    <canvas id="canvas" style="display: none;"></canvas>
+                                </div>
+
+                                <div class="flex justify-center mt-4 space-x-4 space-x-reverse">
+                                    <button id="start-scan-btn" class="btn-primary px-4 py-2">
+                                        تشغيل الكاميرا
+                                    </button>
+                                    <button id="capture-btn" class="btn-success px-4 py-2">
+                                        مسح الباركود
+                                    </button>
+                                    <button id="stop-scan-btn" class="btn-danger px-4 py-2 hidden">
+                                        إيقاف الكاميرا
+                                    </button>
+                                </div>
+                                <p id="scanner-message" class="text-gray-600 mt-2 text-sm text-center">انقر على "تشغيل
+                                    الكاميرا" لتفعيل الماسح الضوئي</p>
+                            </div>
+                            <div>
+                                <h3 class="text-base sm:text-lg font-bold text-gray-700 mb-2">معلومات الجهاز (بعد
+                                    المسح):</h3>
+                                <div id="scanned-device-info" class="border rounded-md p-3 sm:p-4 bg-gray-50 text-sm">
+                                    <input type="hidden" id="scanned-device-id">
+
+                                    <p><span class="font-medium">الرقم التسلسلي:</span> <span
+                                            id="scanned-serial-number">-</span></p>
+                                    <p><span class="font-medium">نوع الجهاز:</span> <span
+                                            id="scanned-device-type">-</span></p>
+                                    <p><span class="font-medium">الموديل:</span> <span id="scanned-model">-</span></p>
+                                    <p><span class="font-medium">معلومات الجهاز:</span> <span
+                                            id="scanned-specs">-</span></p>
+                                    <p><span class="font-medium">الحالة:</span> <span id="scanned-status">-</span></p>
+                                    <p><span class="font-medium">المستخدم الحالي:</span> <span
+                                            id="scanned-current-user">-</span></p>
+                                    <p><span class="font-medium">السنترال:</span> <span id="scanned-central">-</span>
+                                    </p>
+
+                                    <div class="mt-4 flex flex-wrap gap-2">
+                                        <button id="inventory-done-btn" class="btn-success flex-1 min-w-[120px]">
+                                            تم الجرد
+                                        </button>
+                                        <button id="edit-scanned-device-btn" class="btn-primary flex-1 min-w-[120px]">
+                                            تعديل
+                                        </button>
+                                        <button id="delete-scanned-device-btn" class="btn-danger flex-1 min-w-[120px]">
+                                            تخريد
+                                        </button>
+                                        <button id="add-inventory-btn" class="btn-warning flex-1 min-w-[120px]">
+                                            إضافة جهاز
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-3 sm:mb-4">
+                            <h2 class="text-lg sm:text-xl font-bold text-primary-700">قائمة العهد الحالية</h2>
+                            <div class="mt-3 sm:mt-0">
+                                <span class="text-sm font-medium text-gray-700">عدد الأجهزة: <span
+                                        id="total-devices-count">0</span></span>
+                                <span class="mx-2">|</span>
+                                <span class="text-sm font-medium text-green-600">مستخدمة: <span
+                                        id="active-devices-count">0</span></span>
+                                <span class="mx-2">|</span>
+                                <span class="text-sm font-medium text-red-600">مخردة: <span
+                                        id="scrapped-devices-count">0</span></span>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="central-filter" class="block text-sm font-medium text-gray-700 mb-1">اختر
+                                السنترال</label>
+                            <select id="central-filter"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm">
+                                <option value="all">الكل</option>
+                                <option value="سنترال1">سنترال1</option>
+                                <option value="سنترال2">سنترال2</option>
+                                <option value="سنترال3">سنترال3</option>
+                                <option value="سنترال4">سنترال4</option>
+                                <option value="سنترال5">سنترال5</option>
+                                <option value="سنترال6">سنترال6</option>
+                                <option value="سنترال7">سنترال7</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3 sm:mb-4 flex items-center">
+                            <div class="relative flex-grow">
+                                <input type="text" id="inventory-search"
+                                    class="w-full px-10 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                    placeholder="ابحث برقم العامل أو الرقم التسلسلي...">
+                                <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400"
+                                        viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd"
+                                            d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z"
+                                            clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200 text-sm">
+                                <thead>
+                                    <tr class="bg-gray-100">
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">الرقم العامل</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">اسم المستخدم</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">نوع الجهاز</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">الموديل</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">معلومات الجهاز</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">الرقم التسلسلي</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">حالة الجهاز</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-center">حالة الجرد</th>
+                                        <th class="py-2 px-3 sm:px-4 border-b text-right">الإجراءات</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="inventory-table-body">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="reports-section" class="admin-section hidden">
+                    <div class="bg-white rounded-lg shadow-md p-4 sm:p-6 mb-4 sm:mb-6">
+                        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 mobile-card">
+                            <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center mb-2">📊 تقارير الأجهزة
+                            </h1>
+                            <p class="text-sm sm:text-base text-gray-600 text-center">تقارير وإحصائيات شاملة للأجهزة
+                                والمعدات</p>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mb-6 sm:mb-8 mobile-card filter-card">
+                            <h2 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">🔍 فلاتر البحث</h2>
+
+                            <div class="mb-6 border-b pb-4">
+                                <h3 class="text-md font-medium text-blue-700 mb-3">نوع البحث</h3>
+                                <div class="flex flex-wrap gap-4">
+                                    <div class="flex items-center">
+                                        <input type="radio" id="search-inventory" name="searchType" value="inventory"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500" checked>
+                                        <label for="search-inventory"
+                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                            البحث في العهد
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="search-scrap" name="searchType" value="scrap"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                        <label for="search-scrap"
+                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                            البحث في المخردات
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="inventory-search-section" class="mb-6">
+                                <h3 class="text-md font-medium text-blue-700 mb-3 border-b border-blue-200 pb-2">🔍
+                                    البحث في الجرد</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                                    <div>
+                                        <label for="deviceType" class="block text-sm font-medium text-gray-700 mb-2">نوع
+                                            الجهاز</label>
+                                        <select id="deviceType"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">جميع الأجهزة</option>
+                                            <option value="laptop">لابتوب</option>
+                                            <option value="desktop">جهاز مكتبي</option>
+                                            <option value="printer">طابعة</option>
+                                            <option value="monitor">شاشة</option>
+                                            <option value="tablet">تابلت</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="area"
+                                            class="block text-sm font-medium text-gray-700 mb-2">السنترال</label>
+                                        <select id="area"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">كل السنترالات</option>
+                                            <option value="سنترال1">سنترال 1</option>
+                                            <option value="سنترال2">سنترال 2</option>
+                                            <option value="سنترال3">سنترال 3</option>
+                                            <option value="سنترال4">سنترال 4</option>
+                                            <option value="سنترال5">سنترال 5</option>
+                                            <option value="سنترال6">سنترال 6</option>
+                                            <option value="سنترال7">سنترال 7</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="inventoryYear"
+                                            class="block text-sm font-medium text-gray-700 mb-2">سنة الجرد</label>
+                                        <select id="inventoryYear"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">جميع السنوات</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="inventory-specs-filters"
+                                    class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4">
+                                    <div>
+                                        <label for="inventory-ram-filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">الرام</label>
+                                        <select id="inventory-ram-filter"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">الكل</option>
+                                            <option value="DDR3-4G">DDR3-4G</option>
+                                            <option value="DDR4-4G">DDR4-4G</option>
+                                            <option value="DDR4-8G">DDR4-8G</option>
+                                            <option value="DDR4-16G">DDR4-16G</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="inventory-hdd-filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">الهارد</label>
+                                        <select id="inventory-hdd-filter"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">الكل</option>
+                                            <option value="HDD500G">HDD500G</option>
+                                            <option value="HDD1T">HDD1T</option>
+                                            <option value="HDD500G+SSD240G">HDD500G+SSD240G</option>
+                                            <option value="HDD500G+SSD500G">HDD500G+SSD500G</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="scrap-search-section" class="mb-6 hidden">
+                                <h3 class="text-md font-medium text-red-700 mb-3 border-b border-red-200 pb-2">🗑️ البحث
+                                    في المخردات</h3>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                                    <div>
+                                        <label for="scrapDeviceType"
+                                            class="block text-sm font-medium text-gray-700 mb-2">نوع الجهاز</label>
+                                        <select id="scrapDeviceType"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">جميع الأجهزة</option>
+                                            <option value="laptop">لابتوب</option>
+                                            <option value="desktop">جهاز مكتبي</option>
+                                            <option value="printer">طابعة</option>
+                                            <option value="monitor">شاشة</option>
+                                            <option value="tablet">تابلت</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="scrapArea"
+                                            class="block text-sm font-medium text-gray-700 mb-2">السنترال</label>
+                                        <select id="scrapArea"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">كل السنترالات</option>
+                                            <option value="سنترال1">سنترال 1</option>
+                                            <option value="سنترال2">سنترال 2</option>
+                                            <option value="سنترال3">سنترال 3</option>
+                                            <option value="سنترال4">سنترال 4</option>
+                                            <option value="سنترال5">سنترال 5</option>
+                                            <option value="سنترال6">سنترال 6</option>
+                                            <option value="سنترال7">سنترال 7</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="scrapYear" class="block text-sm font-medium text-gray-700 mb-2">سنة
+                                            التخريد</label>
+                                        <select id="scrapYear"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">جميع السنوات</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="scrap-specs-filters"
+                                    class="hidden grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-4">
+                                    <div>
+                                        <label for="scrap-ram-filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">الرام</label>
+                                        <select id="scrap-ram-filter"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">الكل</option>
+                                            <option value="DDR3-4G">DDR3-4G</option>
+                                            <option value="DDR4-4G">DDR4-4G</option>
+                                            <option value="DDR4-8G">DDR4-8G</option>
+                                            <option value="DDR4-16G">DDR4-16G</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="scrap-hdd-filter"
+                                            class="block text-sm font-medium text-gray-700 mb-2">الهارد</label>
+                                        <select id="scrap-hdd-filter"
+                                            class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                                            <option value="all">الكل</option>
+                                            <option value="HDD500G">HDD500G</option>
+                                            <option value="HDD1T">HDD1T</option>
+                                            <option value="HDD500G+SSD240G">HDD500G+SSD240G</option>
+                                            <option value="HDD500G+SSD500G">HDD500G+SSD500G</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                                <button id="applyFilters"
+                                    class="apply-filters-btn text-white px-4 sm:px-6 py-2 font-medium rounded-lg text-sm sm:text-base">
+                                    🔍 تطبيق الفلاتر
+                                </button>
+                                <button id="resetFilters"
+                                    class="bg-gray-500 hover:bg-gray-600 text-white px-4 sm:px-6 py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
+                                    🔄 إعادة تعيين
+                                </button>
+                                <button id="exportReport"
+                                    class="btn-success px-4 sm:px-6 py-2 font-medium text-sm sm:text-base">
+                                    📥 تصدير التقرير
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                                <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">💻</div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">أجهزة كمبيوتر</h3>
+                                <p class="text-lg sm:text-2xl font-bold text-blue-600" id="computerCount">0</p>
+                                <p class="text-xs sm:text-sm text-gray-500">إجمالي الأجهزة</p>
+                                <div class="mt-2 p-2 bg-blue-50 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-blue-700 font-medium">جديد هذا الشهر</p>
+                                    <p class="text-sm sm:text-lg font-bold text-blue-800" id="computerNewCount">+0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                                <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">🖥️</div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">شاشات</h3>
+                                <p class="text-lg sm:text-2xl font-bold text-green-600" id="monitorCount">0</p>
+                                <p class="text-xs sm:text-sm text-gray-500">إجمالي الشاشات</p>
+                                <div class="mt-2 p-2 bg-green-50 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-green-700 font-medium">جديد هذا الشهر</p>
+                                    <p class="text-sm sm:text-lg font-bold text-green-800" id="monitorNewCount">+0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                                <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">💻</div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">لاب توب</h3>
+                                <p class="text-lg sm:text-2xl font-bold text-purple-600" id="laptopCount">0</p>
+                                <p class="text-xs sm:text-sm text-gray-500">إجمالي اللاب توب</p>
+                                <div class="mt-2 p-2 bg-purple-50 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-purple-700 font-medium">جديد هذا الشهر</p>
+                                    <p class="text-sm sm:text-lg font-bold text-purple-800" id="laptopNewCount">+0</p>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                                <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">🖨️</div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">طابعات</h3>
+                                <p class="text-lg sm:text-2xl font-bold text-orange-600" id="printerCount">0</p>
+                                <p class="text-xs sm:text-sm text-gray-500">إجمالي الطابعات</p>
+                                <div class="mt-2 p-2 bg-orange-50 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-orange-700 font-medium">جديد هذا الشهر</p>
+                                    <p class="text-sm sm:text-lg font-bold text-orange-800" id="printerNewCount">+0</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
+                            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mobile-card report-section">
+                                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">📈 توزيع
+                                    الأجهزة حسب النوع</h3>
+                                <div class="h-80 flex items-center justify-center">
+                                    <canvas id="deviceChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mobile-card report-section">
+                                <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4 text-center">📊 حالة
+                                    الأجهزة</h3>
+                                <div class="h-80 flex items-center justify-center">
+                                    <canvas id="statusChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mobile-card report-section">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">📋 تفاصيل الأجهزة</h3>
+                            <div class="mb-4">
+                                <input type="text" id="searchInput" placeholder="🔍 البحث في تفاصيل الأجهزة..."
+                                    class="w-full p-2 sm:p-3 text-sm sm:text-base border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500">
+                            </div>
+                            <div class="mobile-scroll">
+                                <table class="w-full table-auto mobile-table">
+                                    <thead>
+                                        <tr class="bg-gray-50">
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                رقم العامل</th>
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                الاسم</th>
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                موديل الجهاز</th>
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                الرقم التسلسلي</th>
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                تاريخ الجرد</th>
+                                            <th
+                                                class="px-2 sm:px-4 py-2 sm:py-3 text-right text-xs sm:text-sm font-medium text-gray-700">
+                                                تاريخ التخريد</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="deviceTableBody">
+                                        <tr>
+                                            <td colspan="6" class="text-center py-10 text-gray-500">
+                                                الرجاء استخدام الفلاتر أعلاه لعرض البيانات
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mt-6 sm:mt-8 mobile-card report-section">
+                            <h3 class="text-lg sm:text-xl font-semibold text-gray-800 mb-4">📈 ملخص التقرير</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                                <div class="text-center p-3 sm:p-4 bg-blue-50 rounded-lg">
+                                    <h4 class="text-sm sm:text-base font-semibold text-blue-800">الأجهزة المستخدمة</h4>
+                                    <p class="text-xl sm:text-2xl font-bold text-blue-600" id="activeDevices">0</p>
+                                </div>
+                                <div class="text-center p-3 sm:p-4 bg-yellow-50 rounded-lg">
+                                    <h4 class="text-sm sm:text-base font-semibold text-yellow-800">تحت الصيانة</h4>
+                                    <p class="text-xl sm:text-2xl font-bold text-yellow-600" id="maintenanceDevices">0
+                                    </p>
+                                </div>
+                                <div class="text-center p-3 sm:p-4 bg-red-50 rounded-lg">
+                                    <h4 class="text-sm sm:text-base font-semibold text-red-800">مخردة</h4>
+                                    <p class="text-xl sm:text-2xl font-bold text-red-600" id="scrappedDevices">0</p>
+                                </div>
+                            </div>
+
+                            <div class="mt-6">
+                                <h4 class="text-sm sm:text-base font-semibold text-gray-800 mb-2">نسبة الأجهزة المخردة
+                                </h4>
+                                <div class="w-full bg-gray-200 rounded-full h-4">
+                                    <div id="scrap-progress-bar" class="bg-red-600 h-4 rounded-full" style="width: 0%">
+                                    </div>
+                                </div>
+                                <div class="flex justify-between mt-1">
+                                    <span class="text-xs text-gray-600">0%</span>
+                                    <span class="text-xs text-gray-600" id="scrap-percentage">0%</span>
+                                    <span class="text-xs text-gray-600">100%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <div id="scrapModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 sm:p-6 z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md p-6 relative">
+                <button id="closeScrapModal"
+                    class="absolute top-3 left-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                    &times;
+                </button>
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-primary-700">تخريد الجهاز</h3>
+                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200 mt-2 text-right">
+                        <p class="font-medium text-gray-700 mb-1">معلومات العهدة</p>
+                        <p><span class="text-gray-600">النوع:</span> <span id="scrap-device-type"></span></p>
+                        <p><span class="text-gray-600">الموديل:</span> <span id="scrap-device-model"></span></p>
+                        <p><span class="text-gray-600">الرقم التسلسلي:</span> <span id="scrap-device-serial"></span></p>
+                        <p><span class="text-gray-600">اسم المستخدم:</span> <span id="scrap-user-name"></span></p>
+                        <p><span class="text-gray-600">الحالة:</span> <span id="scrap-device-status"></span></p>
+                        <p><span class="text-gray-600">المواصفات:</span> <span id="scrap-device-specs"></span></p>
+                        <p><span class="text-gray-600">السنترال:</span> <span id="scrap-central"></span></p>
+                    </div>
+                </div>
+
+                <form id="scrapForm" class="space-y-4 text-sm">
+                    <div>
+                        <label for="scrap-receipt" class="block text-gray-700 font-medium mb-1">إرفاق إيصال
+                            التخريد *</label>
+                        <input type="file" id="scrap-receipt"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            required>
+                        <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
+                    </div>
+
+                    <div class="flex justify-between mt-6 space-x-4 space-x-reverse">
+                        <button type="button" id="cancelScrap"
+                            class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300">
+                            إلغاء
+                        </button>
+                        <button type="submit" id="confirmScrap"
+                            class="w-1/2 bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                            تأكيد التخريد
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="scrapSuccessModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 sm:p-6 z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md p-6 relative text-center">
+                <div class="mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto text-green-500" fill="none"
+                        viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <h3 class="text-xl font-bold text-primary-700 mt-2">تم التخريد بنجاح</h3>
+                    <p class="text-sm text-gray-600 mt-1">تم تخريد الجهاز من النظام</p>
+                </div>
+                <button type="button" id="closeScrapSuccess"
+                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                    موافق
+                </button>
+            </div>
+        </div>
+
+        <div id="addDeviceModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 sm:p-6 z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
+                <button id="closeAddDeviceModal"
+                    class="absolute top-3 left-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                    &times;
+                </button>
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-primary-700">إضافة جهاز جديد</h3>
+                </div>
+
+                <form id="addDeviceForm" class="space-y-3">
+                    <div class="modal-content pr-2">
+                        <div>
+                            <label for="new-device-type" class="block text-gray-700 font-medium mb-1 text-sm">نوع
+                                الجهاز *</label>
+                            <select id="new-device-type"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                required>
+                                <option value="">-- اختر نوع الجهاز --</option>
+                                <option value="laptop">لابتوب</option>
+                                <option value="desktop">جهاز مكتبي</option>
+                                <option value="printer">طابعة</option>
+                                <option value="monitor">شاشة</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="new-device-model" class="block text-gray-700 font-medium mb-1 text-sm">الموديل
+                                *</label>
+                            <input type="text" id="new-device-model"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                placeholder="أدخل موديل الجهاز" required>
+                        </div>
+                        
+                        <div>
+                            <label for="new-device-serial" class="block text-gray-700 font-medium mb-1 text-sm">الرقم
+                                التسلسلي *</label>
+                            <div class="relative flex items-center">
+                                <input type="text" id="new-device-serial"
+                                    class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                    placeholder="أدخل الرقم التسلسلي يدوياً" required>
+                                <button type="button" id="scan-serial-btn" title="مسح الرقم التسلسلي"
+                                    class="absolute left-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-primary-600 transition-colors">
+                                    <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                                        fill="currentColor">
+                                        <path
+                                            d="M3 11H5V13H3V11ZM3 5H5V9H3V5ZM9 5H11V9H9V5ZM13 5H15V9H13V5ZM19 5H21V9H19V5ZM3 15H5V19H3V15ZM19 15H21V19H19V15ZM15 11H21V13H15V11ZM15 15H17V19H15V15ZM13 15H11V19H13V15ZM9 15H7V19H9V15ZM9 11H13V13H9V11ZM7 11H5V13H7V11ZM15 3H19V1H15V3ZM5 3H9V1H5V3Z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="specs-fields" class="hidden space-y-3">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="new-device-ram"
+                                        class="block text-gray-700 font-medium mb-1 text-sm">الرام *</label>
+                                    <select id="new-device-ram"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                        required>
+                                        <option value="">-- اختر حجم الرام --</option>
+                                        <option value="DDR3-4G">DDR3-4G</option>
+                                        <option value="DDR4-4G">DDR4-4G</option>
+                                        <option value="DDR4-8G">DDR4-8G</option>
+                                        <option value="DDR4-16G">DDR4-16G</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="new-device-hdd"
+                                        class="block text-gray-700 font-medium mb-1 text-sm">الهارد *</label>
+                                    <select id="new-device-hdd"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                        required>
+                                        <option value="">-- اختر نوع الهارد --</option>
+                                        <option value="HDD500G">HDD500G</option>
+                                        <option value="HDD1T">HDD1T</option>
+                                        <option value="HDD500G+SSD240G">HDD500G+SSD240G</option>
+                                        <option value="HDD500G+SSD500G">HDD500G+SSD500G</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="new-device-employee-id" class="block text-gray-700 font-medium mb-1 text-sm">رقم
+                                العامل *</label>
+                            <input type="text" id="new-device-employee-id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                placeholder="أدخل رقم العامل" required>
+                        </div>
+                        <div>
+                            <label for="new-device-central"
+                                class="block text-gray-700 font-medium mb-1 text-sm">السنترال *</label>
+                            <select id="new-device-central"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                required>
+                                <option value="سنترال1">سنترال1</option>
+                                <option value="سنترال2">سنترال2</option>
+                                <option value="سنترال3">سنترال3</option>
+                                <option value="سنترال4">سنترال4</option>
+                                <option value="سنترال5">سنترال5</option>
+                                <option value="سنترال6">سنترال6</option>
+                                <option value="سنترال7">سنترال7</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="new-device-receipt-date"
+                                class="block text-gray-700 font-medium mb-1 text-sm">تاريخ
+                                الاستلام *</label>
+                            <input type="date" id="new-device-receipt-date"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                required>
+                        </div>
+                        <div>
+                            <label for="new-device-notes" class="block text-gray-700 font-medium mb-1 text-sm">ملاحظات
+                            </label>
+                            <textarea id="new-device-notes" rows="2"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                placeholder="أضف أي ملاحظات إضافية"></textarea>
+                        </div>
+
+                        <div class="flex justify-between mt-6 space-x-4 space-x-reverse">
+                            <button type="button" id="cancelAddDevice"
+                                class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                إلغاء
+                            </button>
+                            <button type="submit" id="saveNewDevice"
+                                class="w-1/2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                                حفظ
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+
+        <div id="editDeviceModal"
+            class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 sm:p-6 z-50 hidden">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md p-6 relative">
+                <button id="closeEditDeviceModal"
+                    class="absolute top-3 left-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">
+                    &times;
+                </button>
+                <div class="text-center mb-4">
+                    <h3 class="text-xl font-bold text-primary-700">تعديل العهدة</h3>
+                </div>
+
+                <form id="editDeviceForm" class="space-y-4 text-sm">
+                    <input type="hidden" id="edit-device-id">
+
+                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
+                        <p class="font-medium text-gray-700 mb-1">معلومات العهدة</p>
+                        <p><span class="text-gray-600">النوع:</span> <span id="edit-device-type-display"></span></p>
+
+                        <p><span class="text-gray-600">الموديل:</span> <span id="edit-device-model-display"></span></p>
+
+                        <p><span class="text-gray-600">الرقم التسلسلي:</span> <span
+                                id="edit-device-serial-display"></span></p>
+
+                        <p><span class="text-gray-600">اسم المستخدم:</span> <span id="edit-device-user-display"></span>
+                        </p>
+
+                        <p><span class="text-gray-600">الحالة:</span> <span id="edit-device-status-display"></span></p>
+
+                        <p><span class="text-gray-600">المواصفات:</span> <span id="edit-device-specs-display"></span>
+                        </p>
+
+                        <p><span class="text-gray-600">السنترال:</span> <span id="edit-device-central-display"></span>
+                        </p>
+                    </div>
+
+                    <div>
+                        <label for="edit-device-employee-id" class="block text-gray-700 font-medium mb-1">المستخدم
+                            الجديد (رقم العامل) *</label>
+                        <input type="text" id="edit-device-employee-id"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            placeholder="أدخل رقم العامل للمستخدم الجديد" required>
+                    </div>
+
+                    <div>
+                        <label for="edit-device-status" class="block text-gray-700 font-medium mb-1">الحالة
+                            *</label>
+                        <select id="edit-device-status"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            required>
+                            <option value="in-use">مستخدم</option>
+                            <option value="maintenance">تحت الصيانة</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="edit-device-central" class="block text-gray-700 font-medium mb-1">السنترال *</label>
+                        <select id="edit-device-central"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                            required>
+                            <option value="سنترال1">سنترال1</option>
+                            <option value="سنترال2">سنترال2</option>
+                            <option value="سنترال3">سنترال3</option>
+                            <option value="سنترال4">سنترال4</option>
+                            <option value="سنترال5">سنترال5</option>
+                            <option value="سنترال6">سنترال6</option>
+                            <option value="سنترال7">سنترال7</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="receipt-upload" class="block text-gray-700 font-medium mb-1">إرفاق إيصال
+                            الاستلام</label>
+                        <div class="flex items-center">
+                            <input type="file" id="receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                            <input type="text" id="receipt-file-name"
+                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
+                                placeholder="لم يتم اختيار ملف" readonly>
+                            <button type="button" onclick="document.getElementById('receipt-upload').click()"
+                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
+                                اختر ملف
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
+                    </div>
+
+                    <div class="flex justify-between mt-6 space-x-4 space-x-reverse">
+                        <button type="button" id="cancelEditDevice"
+                            class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                            إلغاء
+                        </button>
+                        <button type="submit" id="saveEditedDevice"
+                            class="w-1/2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // متغيرات عامة
+        const inventoryTableBody = document.getElementById('inventory-table-body');
+        let currentInventoryDeviceId = null;
+        let currentEditDeviceId = null;
+        let currentScrapDeviceId = null;
+        let deviceStatusChart = null;
+        let deviceTypeChart = null;
+        let centralDistributionChart = null;
+
+        // متغيرات الكاميرا
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const startBtn = document.getElementById('start-scan-btn');
+        const captureBtn = document.getElementById('capture-btn');
+        const stopBtn = document.getElementById('stop-scan-btn');
+        const cameraPlaceholder = document.getElementById('camera-placeholder');
+        const scannerMessage = document.getElementById('scanner-message');
+
+        let stream = null;
+        let isCameraActive = false;
+
+        // توليد مواصفات عشوائية للأجهزة
+        function generateRandomSpecs() {
+            const rams = ['DDR3-4G', 'DDR4-4G', 'DDR4-8G', 'DDR4-16G'];
+            const hdds = ['HDD500G', 'HDD1T', 'HDD500G+SSD240G', 'HDD500G+SSD500G'];
+
+            const ram = rams[Math.floor(Math.random() * rams.length)];
+            const hdd = hdds[Math.floor(Math.random() * hdds.length)];
+
+            return `رام: ${ram} | هارد: ${hdd}`;
+        }
+
+        // بيانات الأجهزة الافتراضية مع حالة جرد فارغة للجميع
+        const devicesData = [
+            { "id": "001", "employeeId": "1001", "type": "laptop", "model": "HP ProBook 450 G8", "serial": "LA00000001", "status": "in-use", "user": "أحمد محمد", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "002", "employeeId": "1002", "type": "desktop", "model": "HP EliteDesk 800 G5", "serial": "DE00000002", "status": "in-use", "user": "محمد أحمد", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "003", "employeeId": "1003", "type": "monitor", "model": "LG UltraFine 5K", "serial": "MO00000003", "status": "maintenance", "user": "علي محمود", "central": "سنترال3", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "004", "employeeId": "1004", "type": "printer", "model": "Brother HL-L2350DW", "serial": "PR00000004", "status": "in-use", "user": "فاطمة حسن", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "005", "employeeId": "1005", "type": "tablet", "model": "iPad Air 4", "serial": "TA00000005", "status": "maintenance", "user": "سالم عبدالله", "central": "سنترال5", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "006", "employeeId": "1006", "type": "laptop", "model": "HP EliteBook 840 G7", "serial": "LA00000006", "status": "in-use", "user": "خالد ناصر", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "007", "employeeId": "1007", "type": "desktop", "model": "Dell OptiPlex 7080", "serial": "DE00000007", "status": "in-use", "user": "ريم سليمان", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "008", "employeeId": "1008", "type": "monitor", "model": "Samsung Odyssey G7", "serial": "MO00000008", "status": "in-use", "user": "نورة علي", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "009", "employeeId": "1009", "type": "printer", "model": "Canon Pixma TS6350", "serial": "PR00000009", "status": "maintenance", "user": "عمر راشد", "central": "سنترال2", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "010", "employeeId": "1010", "type": "tablet", "model": "Samsung Galaxy Tab S7", "serial": "TA00000010", "status": "in-use", "user": "سارة عبدالرحمن", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+
+            // Additional 90 devices
+            { "id": "011", "employeeId": "1011", "type": "laptop", "model": "Dell XPS 13", "serial": "LA00000011", "status": "in-use", "user": "مريم خالد", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "012", "employeeId": "1012", "type": "desktop", "model": "Lenovo ThinkCentre M90n", "serial": "DE00000012", "status": "in-use", "user": "ياسر فاروق", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "013", "employeeId": "1013", "type": "monitor", "model": "Dell UltraSharp U2720Q", "serial": "MO00000013", "status": "in-use", "user": "هناء صالح", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "014", "employeeId": "1014", "type": "printer", "model": "HP LaserJet Pro M404n", "serial": "PR00000014", "status": "in-use", "user": "طارق إبراهيم", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "015", "employeeId": "1015", "type": "tablet", "model": "Microsoft Surface Pro 7", "serial": "TA00000015", "status": "in-use", "user": "لطيفة عبدالعزيز", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "016", "employeeId": "1016", "type": "laptop", "model": "MacBook Pro 13\"", "serial": "LA00000016", "status": "in-use", "user": "وليد حامد", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "017", "employeeId": "1017", "type": "desktop", "model": "Apple iMac 24\"", "serial": "DE00000017", "status": "in-use", "user": "أسماء ناصر", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "018", "employeeId": "1018", "type": "monitor", "model": "BenQ PD3200U", "serial": "MO00000018", "status": "maintenance", "user": "بدر سعود", "central": "سنترال4", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "019", "employeeId": "1019", "type": "printer", "model": "Epson EcoTank ET-3760", "serial": "PR00000019", "status": "in-use", "user": "حصة راشد", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "020", "employeeId": "1020", "type": "tablet", "model": "Lenovo Tab P11 Pro", "serial": "TA00000020", "status": "in-use", "user": "عبدالرحمن خليفة", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "021", "employeeId": "1021", "type": "laptop", "model": "Asus ZenBook 14", "serial": "LA00000021", "status": "in-use", "user": "منى عبدالله", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "022", "employeeId": "1022", "type": "desktop", "model": "Acer Aspire TC-895", "serial": "DE00000022", "status": "in-use", "user": "سعد علي", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "023", "employeeId": "1023", "type": "monitor", "model": "Acer Predator XB273K", "serial": "MO00000023", "status": "in-use", "user": "مها سعيد", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "024", "employeeId": "1024", "type": "printer", "model": "Xerox VersaLink C405", "serial": "PR00000024", "status": "maintenance", "user": "فيصل ناجي", "central": "سنترال3", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "025", "employeeId": "1025", "type": "tablet", "model": "Huawei MatePad Pro", "serial": "TA00000025", "status": "in-use", "user": "عبير فهد", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "026", "employeeId": "1026", "type": "laptop", "model": "Lenovo ThinkPad X1 Carbon", "serial": "LA00000026", "status": "in-use", "user": "ناصر حمد", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "027", "employeeId": "1027", "type": "desktop", "model": "HP Z2 Small Form Factor G5", "serial": "DE00000027", "status": "in-use", "user": "هند محمد", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "028", "employeeId": "1028", "type": "monitor", "model": "MSI Optix MAG274QRF", "serial": "MO00000028", "status": "in-use", "user": "رامي عادل", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "029", "employeeId": "1029", "type": "printer", "model": "Lexmark CX625ade", "serial": "PR00000029", "status": "in-use", "user": "شيماء وليد", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "030", "employeeId": "1030", "type": "tablet", "model": "Amazon Fire HD 10", "serial": "TA00000030", "status": "in-use", "user": "فواز عبدالمحسن", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "031", "employeeId": "1031", "type": "laptop", "model": "Microsoft Surface Laptop 4", "serial": "LA00000031", "status": "in-use", "user": "جواهر سلمان", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "032", "employeeId": "1032", "type": "desktop", "model": "Intel NUC 11 Pro", "serial": "DE00000032", "status": "in-use", "user": "بندر خالد", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "033", "employeeId": "1033", "type": "monitor", "model": "Philips 276E8VJSB", "serial": "MO00000033", "status": "maintenance", "user": "أمل رضا", "central": "سنترال5", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "034", "employeeId": "1034", "type": "printer", "model": "Ricoh IM C4500", "serial": "PR00000034", "status": "in-use", "user": "سلمان عبدالهادي", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "035", "employeeId": "1035", "type": "tablet", "model": "Samsung Galaxy Tab A7", "serial": "TA00000035", "status": "in-use", "user": "نوف عبدالكريم", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "036", "employeeId": "1036", "type": "laptop", "model": "Acer Swift 3", "serial": "LA00000036", "status": "in-use", "user": "زياد فؤاد", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "037", "employeeId": "1037", "type": "desktop", "model": "Dell Precision 3240", "serial": "DE00000037", "status": "in-use", "user": "مشاعل نايف", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "038", "employeeId": "1038", "type": "monitor", "model": "ViewSonic VP2768", "serial": "MO00000038", "status": "in-use", "user": "عبدالله سعد", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "039", "employeeId": "1039", "type": "printer", "model": "Kyocera ECOSYS P5026cdn", "serial": "PR00000039", "status": "in-use", "user": "لمى سامي", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "040", "employeeId": "1040", "type": "tablet", "model": "Lenovo Yoga Tab 13", "serial": "TA00000040", "status": "in-use", "user": "ياسين محسن", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "041", "employeeId": "1041", "type": "laptop", "model": "LG Gram 17", "serial": "LA00000041", "status": "in-use", "user": "أروى صباح", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "042", "employeeId": "1042", "type": "desktop", "model": "ASUS ExpertCenter D500SA", "serial": "DE00000042", "status": "in-use", "user": "إيهاب رامي", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "043", "employeeId": "1043", "type": "monitor", "model": "Samsung UR55", "serial": "MO00000043", "status": "in-use", "user": "غادة عثمان", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "044", "employeeId": "1044", "type": "printer", "model": "HP OfficeJet Pro 9025e", "serial": "PR00000044", "status": "maintenance", "user": "خالدية حسن", "central": "سنترال2", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "045", "employeeId": "1045", "type": "tablet", "model": "Apple iPad Pro 12.9\"", "serial": "TA00000045", "status": "in-use", "user": "فهد زايد", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "046", "employeeId": "1046", "type": "laptop", "model": "MSI Prestige 14", "serial": "LA00000046", "status": "in-use", "user": "سلطانة ماجد", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "047", "employeeId": "1047", "type": "desktop", "model": "Lenovo Legion T5", "serial": "DE00000047", "status": "in-use", "user": "مازن هاشم", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "048", "employeeId": "1048", "type": "monitor", "model": "AOC 24G2", "serial": "MO00000048", "status": "in-use", "user": "سحر نبيل", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "049", "employeeId": "1049", "type": "printer", "model": "Canon imageCLASS LBP623Cdw", "serial": "PR00000049", "status": "in-use", "user": "رائد طارق", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "050", "employeeId": "1050", "type": "tablet", "model": "Microsoft Surface Go 3", "serial": "TA00000050", "status": "in-use", "user": "هدى سليمان", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "051", "employeeId": "1051", "type": "laptop", "model": "Razer Blade 15", "serial": "LA00000051", "status": "in-use", "user": "سليمان ربيع", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "052", "employeeId": "1052", "type": "desktop", "model": "CyberPowerPC Gamer Xtreme", "serial": "DE00000052", "status": "in-use", "user": "أحلام سمير", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "053", "employeeId": "1053", "type": "monitor", "model": "Alienware AW3420DW", "serial": "MO00000053", "status": "maintenance", "user": "عبدالعزيز منصور", "central": "سنترال4", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "054", "employeeId": "1054", "type": "printer", "model": "Pantum P2502W", "serial": "PR00000054", "status": "in-use", "user": "مريم عبدالغني", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "055", "employeeId": "1055", "type": "tablet", "model": "TCL Tab 10s", "serial": "TA00000055", "status": "in-use", "user": "سعد عبدالمنعم", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "056", "employeeId": "1056", "type": "laptop", "model": "Samsung Galaxy Book Pro", "serial": "LA00000056", "status": "in-use", "user": "نادية فارس", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "057", "employeeId": "1057", "type": "desktop", "model": "HP Pavilion TP01", "serial": "DE00000057", "status": "in-use", "user": "فارس عادل", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "058", "employeeId": "1058", "type": "monitor", "model": "Gigabyte G27QC", "serial": "MO00000058", "status": "in-use", "user": "حنان سيف", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "059", "employeeId": "1059", "type": "printer", "model": "OKI MC853dn", "serial": "PR00000059", "status": "in-use", "user": "عبدالمجيد خالد", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "060", "employeeId": "1060", "type": "tablet", "model": "Realme Pad", "serial": "TA00000060", "status": "in-use", "user": "أميرة وائل", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "061", "employeeId": "1061", "type": "laptop", "model": "Lenovo IdeaPad 5", "serial": "LA00000061", "status": "in-use", "user": "بسام رامي", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "062", "employeeId": "1062", "type": "desktop", "model": "ASUS ROG Strix G15", "serial": "DE00000062", "status": "in-use", "user": "جمال عبدالرحيم", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "063", "employeeId": "1063", "type": "monitor", "model": "LG 27GN950-B", "serial": "MO00000063", "status": "in-use", "user": "ريماز خليل", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "064", "employeeId": "1064", "type": "printer", "model": "Brother MFC-L8900CDW", "serial": "PR00000064", "status": "maintenance", "user": "وسام نبيل", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "065", "employeeId": "1065", "type": "tablet", "model": "Oppo Pad Air", "serial": "TA00000065", "status": "in-use", "user": "نبيل سامي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "066", "employeeId": "1066", "type": "laptop", "model": "Dell Latitude 7420", "serial": "LA00000066", "status": "in-use", "user": "سامية حازم", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "067", "employeeId": "1067", "type": "desktop", "model": "Apple Mac mini", "serial": "DE00000067", "status": "in-use", "user": "مازن عاطف", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "068", "employeeId": "1068", "type": "monitor", "model": "BenQ EW3270U", "serial": "MO00000068", "status": "in-use", "user": "إيناس طه", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "069", "employeeId": "1069", "type": "printer", "model": "Konica Minolta bizhub C360i", "serial": "PR00000069", "status": "in-use", "user": "وسيم رفعت", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "070", "employeeId": "1070", "type": "tablet", "model": "Xiaomi Pad 5", "serial": "TA00000070", "status": "in-use", "user": "ليلى عماد", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "071", "employeeId": "1071", "type": "laptop", "model": "HP Spectre x360", "serial": "LA00000071", "status": "in-use", "user": "هشام كمال", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "072", "employeeId": "1072", "type": "desktop", "model": "Dell OptiPlex 3090", "serial": "DE00000072", "status": "in-use", "user": "نادين أسامة", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "073", "employeeId": "1073", "type": "monitor", "model": "ViewSonic XG270QG", "serial": "MO00000073", "status": "in-use", "user": "رامي سمير", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "074", "employeeId": "1074", "type": "printer", "model": "Sharp MX-3070N", "serial": "PR00000074", "status": "in-use", "user": "سمر حمدي", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "075", "employeeId": "1075", "type": "tablet", "model": "Alldocube iPlay 50", "serial": "TA00000075", "status": "in-use", "user": "عمران سعيد", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "076", "employeeId": "1076", "type": "laptop", "model": "Asus ROG Zephyrus G14", "serial": "LA00000076", "status": "in-use", "user": "ميسون رامي", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "077", "employeeId": "1077", "type": "desktop", "model": "Lenovo ThinkStation P350", "serial": "DE00000077", "status": "in-use", "user": "وسيلة محمود", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "078", "employeeId": "1078", "type": "monitor", "model": "Acer Nitro XV272U", "serial": "MO00000078", "status": "maintenance", "user": "محمود شريف", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "079", "employeeId": "1079", "type": "printer", "model": "Toshiba e-STUDIO3515AC", "serial": "PR00000079", "status": "in-use", "user": "سارة هاني", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "080", "employeeId": "1080", "type": "tablet", "model": "Blackview Tab 7", "serial": "TA00000080", "status": "in-use", "user": "هاني عاصم", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "081", "employeeId": "1081", "type": "laptop", "model": "Microsoft Surface Laptop Go", "serial": "LA00000081", "status": "in-use", "user": "إيمان رضا", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "082", "employeeId": "1082", "type": "desktop", "model": "HP EliteDesk 805 G8", "serial": "DE00000082", "status": "in-use", "user": "رامي نبيل", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "083", "employeeId": "1083", "type": "monitor", "model": "Samsung S80A", "serial": "MO00000083", "status": "in-use", "user": "ناهد كريم", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "084", "employeeId": "1084", "type": "printer", "model": "Canon MAXIFY GX4020", "serial": "PR00000084", "status": "in-use", "user": "كريم أسعد", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "085", "employeeId": "1085", "type": "tablet", "model": "Doogee T10", "serial": "TA00000085", "status": "in-use", "user": "أسعد فريد", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "086", "employeeId": "1086", "type": "laptop", "model": "Dell Inspiron 16 Plus", "serial": "LA00000086", "status": "in-use", "user": "فريد أنور", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "087", "employeeId": "1087", "type": "desktop", "model": "ASUS ExpertCenter D7", "serial": "DE00000087", "status": "in-use", "user": "أنور ماهر", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "088", "employeeId": "1088", "type": "monitor", "model": "LG UltraWide 34WN80C", "serial": "MO00000088", "status": "in-use", "user": "ماهر سليم", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "089", "employeeId": "1089", "type": "printer", "model": "HP Neverstop 1202nw", "serial": "PR00000089", "status": "in-use", "user": "سليم عدنان", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "090", "employeeId": "1090", "type": "tablet", "model": "Ulefone Power Armor 13", "serial": "TA00000090", "status": "in-use", "user": "عدنان ماهر", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "091", "employeeId": "1091", "type": "laptop", "model": "Lenovo Yoga 9i", "serial": "LA00000091", "status": "in-use", "user": "ماهر ناصر", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "092", "employeeId": "1092", "type": "desktop", "model": "Dell Vostro 3681", "serial": "DE00000092", "status": "in-use", "user": "ناصر حامد", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "093", "employeeId": "1093", "type": "monitor", "model": "Philips 345E2AE", "serial": "MO00000093", "status": "in-use", "user": "حامد سفيان", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "094", "employeeId": "1094", "type": "printer", "model": "Epson WorkForce WF-2860", "serial": "PR00000094", "status": "maintenance", "user": "سفيان طلال", "central": "سنترال3", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "095", "employeeId": "1095", "type": "tablet", "model": "Samsung Galaxy Tab S6 Lite", "serial": "TA00000095", "status": "in-use", "user": "طلال رامي", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "096", "employeeId": "1096", "type": "laptop", "model": "Acer Chromebook Spin 713", "serial": "LA00000096", "status": "in-use", "user": "رامي وسام", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "097", "employeeId": "1097", "type": "desktop", "model": "HP ProDesk 400 G7", "serial": "DE00000097", "status": "in-use", "user": "وسام نادر", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
+            { "id": "098", "employeeId": "1098", "type": "monitor", "model": "Dell S2721QS", "serial": "MO00000098", "status": "in-use", "user": "نادر عمرو", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "099", "employeeId": "1099", "type": "printer", "model": "Brother DCP-L2550DW", "serial": "PR00000099", "status": "in-use", "user": "عمرو سامح", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "100", "employeeId": "1100", "type": "tablet", "model": "HONOR Pad 8", "serial": "TA00000100", "status": "in-use", "user": "سامح رفعت", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" }
+        ];
+
+        // إشعارات التخريد
+        const scrapNotifications = [
+            { id: 1, title: "تخريد جهاز جديد", content: "تم تخريد لابتوب من قبل محمد أحمد", time: "قبل 10 دقائق", read: false },
+            { id: 2, title: "تخريد طابعة", content: "تم تخريد طابعة HP LaserJet Pro M404n", time: "قبل 30 دقيقة", read: false },
+            { id: 3, title: "تخريد شاشة", content: "تم تخريد شاشة Dell UltraSharp U2722D", time: "قبل ساعة", read: false }
+        ];
+
+        // =====================================
+        // كود التقارير والإحصائيات - مع التعديلات
+        // =====================================
+
+        // دالة لإنشاء بيانات التقارير من بيانات الأجهزة
+        function generateReportData() {
+            return devicesData.map(device => {
+                const inventoryDate = new Date();
+                inventoryDate.setMonth(inventoryDate.getMonth() - Math.floor(Math.random() * 12));
+                inventoryDate.setDate(Math.floor(Math.random() * 28) + 1);
+
+                const scrapDate = device.status === 'scrapped' ? new Date(inventoryDate) : null;
+                if (scrapDate) {
+                    scrapDate.setMonth(scrapDate.getMonth() + Math.floor(Math.random() * 12));
+                    scrapDate.setDate(Math.floor(Math.random() * 28) + 1);
+                }
+
+                return {
+                    employeeId: device.employeeId,
+                    name: device.user,
+                    type: device.type,
+                    model: device.model,
+                    serialNumber: device.serial,
+                    inventoryDate: device.inventoryDone ? 'تم الجرد' : '-',
+                    scrapDate: device.status === 'scrapped' ? device.scrapDate || 'تاريخ التخريد غير محدد' : null,
+                    status: device.status,
+                    area: device.central,
+                    inventoryYear: new Date().getFullYear(), // Simplified for example
+                    specs: device.specs // **تمت إضافة المواصفات هنا**
+                };
+            });
+        }
+
+
+        // تهيئة المخططات للتقارير مع البيانات المفلترة
+        function initReportsCharts(reportData) {
+            // مخطط توزيع الأجهزة حسب النوع
+            const deviceCtx = document.getElementById('deviceChart').getContext('2d');
+            const deviceCounts = {
+                laptop: reportData.filter(d => d.type === 'laptop').length,
+                desktop: reportData.filter(d => d.type === 'desktop').length,
+                printer: reportData.filter(d => d.type === 'printer').length,
+                monitor: reportData.filter(d => d.type === 'monitor').length,
+                tablet: reportData.filter(d => d.type === 'tablet').length
+            };
+
+            const total = Object.values(deviceCounts).reduce((sum, count) => sum + count, 0);
+
+            if (window.deviceChartInstance) {
+                window.deviceChartInstance.destroy();
+            }
+
+            window.deviceChartInstance = new Chart(deviceCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['💻 لابتوب', '🖥️ أجهزة مكتبية', '🖨️ طابعات', '🖥️ شاشات', '📱 تابلت'],
+                    datasets: [{
+                        data: [
+                            deviceCounts.laptop,
+                            deviceCounts.desktop,
+                            deviceCounts.printer,
+                            deviceCounts.monitor,
+                            deviceCounts.tablet
+                        ],
+                        backgroundColor: [
+                            '#8B5CF6',
+                            '#3B82F6',
+                            '#F59E0B',
+                            '#10B981',
+                            '#EC4899'
+                        ],
+                        borderWidth: 3,
+                        borderColor: '#ffffff',
+                        hoverBorderWidth: 4,
+                        hoverBorderColor: '#ffffff',
+                        hoverBackgroundColor: [
+                            '#7C3AED',
+                            '#2563EB',
+                            '#D97706',
+                            '#059669',
+                            '#DB2777'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12,
+                                    family: 'Tajawal',
+                                    weight: '600'
+                                },
+                                color: '#374151',
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#ffffff',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold',
+                                family: 'Tajawal'
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: 'Tajawal'
+                            },
+                            callbacks: {
+                                label: function (context) {
+                                    const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                    return context.label + ': ' + context.parsed + ' جهاز (' + percentage + '%)';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // مخطط حالة الأجهزة
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            const statusCounts = {
+                'in-use': reportData.filter(d => d.status === 'in-use').length,
+                maintenance: reportData.filter(d => d.status === 'maintenance').length,
+                scrapped: reportData.filter(d => d.status === 'scrapped').length
+            };
+
+            if (window.statusChartInstance) {
+                window.statusChartInstance.destroy();
+            }
+
+            window.statusChartInstance = new Chart(statusCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['✅ مستخدمة', '🔧 تحت الصيانة', '🗑️ مخردة'],
+                    datasets: [{
+                        label: 'عدد الأجهزة',
+                        data: [
+                            statusCounts['in-use'],
+                            statusCounts.maintenance,
+                            statusCounts.scrapped
+                        ],
+                        backgroundColor: [
+                            '#10B981',
+                            '#F59E0B',
+                            '#EF4444'
+                        ],
+                        borderRadius: 8,
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverBackgroundColor: [
+                            '#059669',
+                            '#D97706',
+                            '#DC2626'
+                        ],
+                        hoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: '#ffffff',
+                            bodyColor: '#ffffff',
+                            borderColor: '#ffffff',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            padding: 12,
+                            titleFont: {
+                                size: 14,
+                                weight: 'bold',
+                                family: 'Tajawal'
+                            },
+                            bodyFont: {
+                                size: 13,
+                                family: 'Tajawal'
+                            },
+                            callbacks: {
+                                label: function (context) {
+                                    return context.label + ': ' + context.parsed.y + ' جهاز';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.1)',
+                                lineWidth: 1
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12
+                                },
+                                color: '#6B7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    family: 'Tajawal',
+                                    size: 12,
+                                    weight: '600'
+                                },
+                                color: '#374151'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 800,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        }
+
+        // تحديث الجدول بالبيانات المفلترة
+        function updateReportTable(reportData) {
+            const tbody = document.getElementById('deviceTableBody');
+            tbody.innerHTML = '';
+
+            if (reportData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-10 text-gray-500">الرجاء استخدام الفلاتر أعلاه لعرض البيانات أو لا توجد بيانات تطابق بحثك.</td></tr>`;
+                return;
+            }
+
+
+            reportData.forEach(device => {
+                const row = document.createElement('tr');
+                const isScrapped = device.status === 'scrapped';
+                row.className = `border-b hover:bg-gray-50 ${isScrapped ? 'text-red-600 scrapped-row' : ''}`;
+
+                row.innerHTML = `
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 font-medium text-xs sm:text-sm">${device.employeeId}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">${device.name}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">${device.model}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm font-mono">${device.serialNumber}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">${device.inventoryDate}</td>
+                    <td class="px-2 sm:px-4 py-2 sm:py-3 text-xs sm:text-sm">${device.scrapDate || '-'}</td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // تحديث الإحصائيات بالبيانات المفلترة
+        function updateReportStats(reportData) {
+            const stats = {
+                computer: reportData.filter(d => d.type === 'desktop').length,
+                monitor: reportData.filter(d => d.type === 'monitor').length,
+                laptop: reportData.filter(d => d.type === 'laptop').length,
+                printer: reportData.filter(d => d.type === 'printer').length,
+                scrapped: reportData.filter(d => d.status === 'scrapped').length,
+                active: reportData.filter(d => d.status === 'in-use').length,
+                maintenance: reportData.filter(d => d.status === 'maintenance').length,
+                computerNew: reportData.filter(d => d.type === 'desktop' && d.isNew).length || 0,
+                monitorNew: reportData.filter(d => d.type === 'monitor' && d.isNew).length || 0,
+                laptopNew: reportData.filter(d => d.type === 'laptop' && d.isNew).length || 0,
+                printerNew: reportData.filter(d => d.type === 'printer' && d.isNew).length || 0
+            };
+
+            document.getElementById('computerCount').textContent = stats.computer;
+            document.getElementById('monitorCount').textContent = stats.monitor;
+            document.getElementById('laptopCount').textContent = stats.laptop;
+            document.getElementById('printerCount').textContent = stats.printer;
+            document.getElementById('activeDevices').textContent = stats.active;
+            document.getElementById('maintenanceDevices').textContent = stats.maintenance;
+            document.getElementById('scrappedDevices').textContent = stats.scrapped;
+
+            document.getElementById('computerNewCount').textContent = '+' + stats.computerNew;
+            document.getElementById('monitorNewCount').textContent = '+' + stats.monitorNew;
+            document.getElementById('laptopNewCount').textContent = '+' + stats.laptopNew;
+            document.getElementById('printerNewCount').textContent = '+' + stats.printerNew;
+
+            // تحديث شريط تقدم الأجهزة المخردة
+            const totalDevices = reportData.length > 0 ? reportData.length : devicesData.length;
+            const scrappedPercentage = totalDevices > 0 ? Math.round((stats.scrapped / totalDevices) * 100) : 0;
+            document.getElementById('scrap-progress-bar').style.width = scrappedPercentage + '%';
+            document.getElementById('scrap-percentage').textContent = scrappedPercentage + '%';
+        }
+
+        // تطبيق الفلاتر
+        function applyReportFilters() {
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            // توليد البيانات الأصلية
+            const allReportData = generateReportData();
+            let filteredReportData;
+
+            // فلترة البيانات
+            if (searchType === 'inventory') {
+                const deviceType = document.getElementById('deviceType').value;
+                const area = document.getElementById('area').value;
+                const inventoryYear = document.getElementById('inventoryYear').value;
+                const ram = document.getElementById('inventory-ram-filter').value;
+                const hdd = document.getElementById('inventory-hdd-filter').value;
+
+                filteredReportData = allReportData.filter(device => {
+                    const typeMatch = deviceType === 'all' || device.type === deviceType;
+                    const areaMatch = area === 'all' || device.area === area;
+                    const yearMatch = inventoryYear === 'all' || device.inventoryYear.toString() === inventoryYear;
+
+                    let specsMatch = true;
+                    if (device.type === 'laptop' || device.type === 'desktop') {
+                        const ramMatch = ram === 'all' || (device.specs && device.specs.includes(ram));
+                        const hddMatch = hdd === 'all' || (device.specs && device.specs.includes(hdd));
+                        specsMatch = ramMatch && hddMatch;
+                    }
+
+                    return typeMatch && areaMatch && yearMatch && specsMatch;
+                });
+
+            } else { // searchType === 'scrap'
+                const scrapDeviceType = document.getElementById('scrapDeviceType').value;
+                const scrapArea = document.getElementById('scrapArea').value;
+                const scrapYear = document.getElementById('scrapYear').value;
+                const ram = document.getElementById('scrap-ram-filter').value;
+                const hdd = document.getElementById('scrap-hdd-filter').value;
+
+                filteredReportData = allReportData.filter(device => {
+                    const statusMatch = device.status === 'scrapped';
+                    const typeMatch = scrapDeviceType === 'all' || device.type === scrapDeviceType;
+                    const areaMatch = scrapArea === 'all' || device.area === scrapArea;
+                    const yearMatch = scrapYear === 'all' || (device.scrapYear && device.scrapYear.toString() === scrapYear);
+
+                    let specsMatch = true;
+                    if (device.type === 'laptop' || device.type === 'desktop') {
+                        const ramMatch = ram === 'all' || (device.specs && device.specs.includes(ram));
+                        const hddMatch = hdd === 'all' || (device.specs && device.specs.includes(hdd));
+                        specsMatch = ramMatch && hddMatch;
+                    }
+
+                    return statusMatch && typeMatch && areaMatch && yearMatch && specsMatch;
+                });
+            }
+
+            // تحديث المكونات بالبيانات المفلترة
+            updateReportTable(filteredReportData);
+            updateReportStats(filteredReportData);
+            initReportsCharts(filteredReportData);
+
+            // إضافة تأثير تمييز للصفوف
+            document.querySelectorAll('#deviceTableBody tr').forEach(row => {
+                row.classList.add('highlight-row');
+                setTimeout(() => {
+                    row.classList.remove('highlight-row');
+                }, 2000);
+            });
+        }
+
+
+        // إعادة تعيين الفلاتر
+        function resetReportFilters() {
+            // Reset inventory filters
+            document.getElementById('deviceType').value = 'all';
+            document.getElementById('area').value = 'all';
+            document.getElementById('inventoryYear').value = 'all';
+            document.getElementById('inventory-ram-filter').value = 'all';
+            document.getElementById('inventory-hdd-filter').value = 'all';
+            document.getElementById('inventory-specs-filters').classList.add('hidden');
+
+            // Reset scrap filters
+            document.getElementById('scrapDeviceType').value = 'all';
+            document.getElementById('scrapArea').value = 'all';
+            document.getElementById('scrapYear').value = 'all';
+            document.getElementById('scrap-ram-filter').value = 'all';
+            document.getElementById('scrap-hdd-filter').value = 'all';
+            document.getElementById('scrap-specs-filters').classList.add('hidden');
+
+            // إعادة تعيين Radio Buttons
+            document.getElementById('search-inventory').checked = true;
+            document.getElementById('inventory-search-section').classList.remove('hidden');
+            document.getElementById('scrap-search-section').classList.add('hidden');
+
+            // تطبيق الفلاتر بعد الإعادة
+            initReportsPage();
+        }
+
+
+        // دالة لإظهار/إخفاء أقسام الفلاتر بناءً على الاختيار
+        function toggleSearchSections() {
+            const searchType = document.querySelector('input[name="searchType"]:checked').value;
+
+            if (searchType === 'inventory') {
+                document.getElementById('inventory-search-section').classList.remove('hidden');
+                document.getElementById('scrap-search-section').classList.add('hidden');
+            } else {
+                document.getElementById('inventory-search-section').classList.add('hidden');
+                document.getElementById('scrap-search-section').classList.remove('hidden');
+            }
+        }
+
+        // تصدير التقرير
+        function exportReport() {
+            // توليد البيانات الأصلية
+            const allReportData = generateReportData();
+
+            // تحضير البيانات للتصدير
+            const excelData = allReportData.map(device => ({
+                'رقم العامل': device.employeeId,
+                'اسم المستخدم': device.name,
+                'نوع الجهاز': getDeviceTypeName(device.type),
+                'الموديل': device.model,
+                'الرقم التسلسلي': device.serialNumber,
+                'السنترال': device.area,
+                'تاريخ الجرد': device.inventoryDate,
+                'تاريخ التخريد': device.scrapDate || '-',
+                'حالة الجهاز': device.status === 'in-use' ? 'مستخدم' :
+                    device.status === 'maintenance' ? 'تحت الصيانة' : 'مخرد'
+            }));
+
+            // إنشاء مصنف Excel
+            const wb = XLSX.utils.book_new();
+
+            // إنشاء ورقة عمل من البيانات
+            const ws = XLSX.utils.json_to_sheet(excelData);
+
+            // إضافة ورقة العمل إلى المصنف
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير الأجهزة");
+
+            // تصدير الملف
+            XLSX.writeFile(wb, `تقرير_الأجهزة_${new Date().toISOString().split('T')[0]}.xlsx`);
+
+            // إظهار رسالة تأكيد
+            alert('تم تصدير التقرير بنجاح! 📥 سيتم تنزيل ملف Excel قريبًا');
+        }
+
+        // البحث في الجدول
+        function searchReportTable() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const tbody = document.getElementById('deviceTableBody');
+            const rows = tbody.getElementsByTagName('tr');
+
+            for (let i = 0; i < rows.length; i++) {
+                const row = rows[i];
+                const cells = row.getElementsByTagName('td');
+                let found = false;
+
+                for (let j = 0; j < cells.length; j++) {
+                    const cellText = cells[j].textContent.toLowerCase();
+                    if (cellText.includes(searchTerm)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found || searchTerm === '') {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            }
+        }
+
+        // تنسيق التاريخ
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        // تهيئة صفحة التقارير
+        function initReportsPage() {
+            updateReportTable([]);
+            updateReportStats([]);
+            initReportsCharts([]);
+        }
+
+        // =====================================
+        // بقية الكود كما هو مع التعديلات على التخريد
+        // =====================================
+
+        // عرض الأجهزة في الجدول
+        function displayInventory() {
+            inventoryTableBody.innerHTML = '';
+
+            const selectedCentral = document.getElementById('central-filter').value;
+            const searchTerm = document.getElementById('inventory-search').value.toLowerCase();
+
+            let filteredDevices = [...devicesData];
+
+            // Filter by central
+            if (selectedCentral !== 'all') {
+                filteredDevices = filteredDevices.filter(device => device.central === selectedCentral);
+            }
+
+            // Exclude scrapped devices by default
+            filteredDevices = filteredDevices.filter(device => device.status !== 'scrapped');
+
+            // Filter by search term
+            if (searchTerm) {
+                filteredDevices = filteredDevices.filter(device =>
+                    (device.employeeId && device.employeeId.includes(searchTerm)) ||
+                    (device.user && device.user.toLowerCase().includes(searchTerm)) ||
+                    (device.serial && device.serial.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            // تحديث إحصائيات الأجهزة
+            const totalDevices = filteredDevices.length;
+            const activeDevices = filteredDevices.filter(d => d.status === 'in-use').length;
+            const scrappedDevices = filteredDevices.filter(d => d.status === 'scrapped').length;
+
+            document.getElementById('total-devices-count').textContent = totalDevices;
+            document.getElementById('active-devices-count').textContent = activeDevices;
+            document.getElementById('scrapped-devices-count').textContent = scrappedDevices;
+
+            filteredDevices.forEach(device => {
+                const row = document.createElement('tr');
+                row.setAttribute('data-device-id', device.id);
+                row.classList.add('animate-pop', 'table-row-highlight');
+
+                // إضافة فئة للأجهزة المخردة
+                if (device.status === 'scrapped') {
+                    row.classList.add('scrapped-row');
+                }
+
+                // تحديد لون وحالة الجهاز
+                let statusClass, statusText;
+                switch (device.status) {
+                    case 'in-use':
+                        statusClass = 'bg-green-100 text-green-800';
+                        statusText = 'مستخدم';
+                        break;
+                    case 'maintenance':
+                        statusClass = 'bg-yellow-100 text-yellow-800';
+                        statusText = 'تحت الصيانة';
+                        break;
+                    case 'scrapped':
+                        statusClass = 'bg-red-100 text-red-800';
+                        statusText = 'مخرد';
+                        break;
+                }
+
+                row.innerHTML = `
+                    <td class="py-2 px-3 sm:px-4 border-b">${device.employeeId || '---'}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b">${device.user || '---'}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b">${getDeviceTypeName(device.type)}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b">${device.model}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b device-specs">${device.specs || ''}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b">${device.serial}</td>
+                    <td class="py-2 px-3 sm:px-4 border-b">
+                        <span class="px-2 py-1 ${statusClass} rounded-full text-xs">${statusText}</span>
+                    </td>
+                    <td class="py-2 px-3 sm:px-4 border-b text-center">
+                        <input type="checkbox" class="inventory-checkbox h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
+                            ${device.inventoryDone ? 'checked' : ''}>
+                    </td>
+                    <td class="py-2 px-3 sm:px-4 border-b">
+                        <div class="flex space-x-2 space-x-reverse">
+                            <button class="edit-device-btn bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-md text-xs" 
+                                    data-device-id="${device.id}">
+                                تعديل
+                            </button>
+                            <button class="scrap-btn bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md text-xs">
+                                تخريد
+                            </button>
+                        </div>
+                    </td>
+                `;
+                inventoryTableBody.appendChild(row);
+            });
+        }
+
+        // دالة مساعدة لتحويل نوع الجهاز إلى اسم عربي
+        function getDeviceTypeName(type) {
+            const types = {
+                'laptop': 'لابتوب',
+                'desktop': 'جهاز مكتبي',
+                'printer': 'طابعة',
+                'monitor': 'شاشة',
+                'scanner': 'سكانر',
+                'other': 'أخرى',
+                'tablet': 'تابلت'
+            };
+            return types[type] || type;
+        }
+
+        // عرض نموذج تأكيد التخريد
+        function showScrapModal(deviceId) {
+            currentScrapDeviceId = deviceId;
+            const device = devicesData.find(d => d.id === deviceId);
+
+            if (device) {
+                // تعبئة معلومات العهدة بالترتيب الجديد
+                document.getElementById('scrap-device-type').textContent = getDeviceTypeName(device.type);
+                document.getElementById('scrap-device-model').textContent = device.model;
+                document.getElementById('scrap-device-serial').textContent = device.serial;
+                document.getElementById('scrap-user-name').textContent = device.user || '---';
+                document.getElementById('scrap-device-specs').textContent = device.specs || '---';
+                document.getElementById('scrap-central').textContent = device.central || '---';
+
+                // تحويل الحالة إلى نص
+                let statusText;
+                switch (device.status) {
+                    case 'in-use': statusText = 'مستخدم'; break;
+                    case 'maintenance': statusText = 'تحت الصيانة'; break;
+                    case 'scrapped': statusText = 'مخرد'; break;
+                }
+                document.getElementById('scrap-device-status').textContent = statusText;
+            }
+
+            document.getElementById('scrapModal').classList.remove('hidden');
+        }
+
+        // إخفاء نموذج التخريد
+        function hideScrapModal() {
+            document.getElementById('scrapModal').classList.add('hidden');
+            document.getElementById('scrapForm').reset();
+        }
+
+        // عرض نموذج نجاح التخريد
+        function showScrapSuccessModal() {
+            document.getElementById('scrapSuccessModal').classList.remove('hidden');
+        }
+
+        // إخفاء نموذج نجاح التخريد
+        function hideScrapSuccessModal() {
+            document.getElementById('scrapSuccessModal').classList.add('hidden');
+        }
+
+        // عرض نموذج إضافة جهاز جديد
+        function showAddDeviceModal() {
+            document.getElementById('addDeviceModal').classList.remove('hidden');
+        }
+
+        // إخفاء نموذج إضافة جهاز جديد
+        function hideAddDeviceModal() {
+            document.getElementById('addDeviceModal').classList.add('hidden');
+            document.getElementById('addDeviceForm').reset();
+        }
+
+        // عرض نموذج تعديل جهاز
+        function showEditDeviceModal(deviceId) {
+            currentEditDeviceId = deviceId;
+            const device = devicesData.find(d => d.id === deviceId);
+
+            if (device) {
+                document.getElementById('edit-device-id').value = device.id;
+
+                // تعبئة معلومات العهدة بالترتيب الجديد
+                document.getElementById('edit-device-type-display').textContent = getDeviceTypeName(device.type);
+                document.getElementById('edit-device-model-display').textContent = device.model;
+                document.getElementById('edit-device-serial-display').textContent = device.serial;
+                document.getElementById('edit-device-user-display').textContent = device.user || '---';
+                document.getElementById('edit-device-specs-display').textContent = device.specs || '---';
+                document.getElementById('edit-device-central-display').textContent = device.central || '---';
+
+                // تحويل الحالة إلى نص
+                let statusText;
+                switch (device.status) {
+                    case 'in-use': statusText = 'مستخدم'; break;
+                    case 'maintenance': statusText = 'تحت الصيانة'; break;
+                    case 'scrapped': statusText = 'مخرد'; break;
+                }
+                document.getElementById('edit-device-status-display').textContent = statusText;
+
+                // تعبئة حقول التعديل
+                document.getElementById('edit-device-status').value = device.status;
+                document.getElementById('edit-device-employee-id').value = device.employeeId || '';
+                document.getElementById('edit-device-central').value = device.central || 'سنترال1';
+
+                document.getElementById('editDeviceModal').classList.remove('hidden');
+            }
+        }
+
+
+        // إخفاء نموذج تعديل جهاز
+        function hideEditDeviceModal() {
+            document.getElementById('editDeviceModal').classList.add('hidden');
+            document.getElementById('editDeviceForm').reset();
+        }
+
+        // حذف الجهاز من المخزون مع تحديث التقارير
+        function scrapDevice(deviceId) {
+            const device = devicesData.find(d => d.id === deviceId);
+            if (device) {
+                device.status = 'scrapped';
+                device.scrapDate = new Date().toISOString().split('T')[0]; // Set scrap date to today
+
+                // Refresh the inventory display
+                displayInventory();
+
+                // Update the reports data and stats
+                const reportData = generateReportData();
+                updateReportTable(reportData);
+                updateReportStats(reportData);
+                initReportsCharts(reportData);
+
+                // Add a new notification
+                const notification = {
+                    title: 'Device Scrapped',
+                    content: `You scrapped device ${device.model} (${device.serial})`,
+                    time: new Date().toLocaleTimeString(),
+                    read: false
+                };
+                scrapNotifications.push(notification);
+                updateNotificationBadge();
+
+                // Show success message
+                const message = document.getElementById('delete-success-message');
+                message.style.display = 'block';
+                setTimeout(() => {
+                    message.style.display = 'none';
+                }, 3000);
+
+                // Hide scrap modal and show success modal
+                hideScrapModal();
+                showScrapSuccessModal();
+            } else {
+                alert('Device not found');
+            }
+        }
+
+
+        // تبديل بين أقسام لوحة التحكم
+        function switchAdminSection(target) {
+            document.querySelectorAll('.admin-section').forEach(section => {
+                section.classList.add('hidden');
+                section.classList.remove('active');
+            });
+
+            const targetSection = document.getElementById(`${target}-section`);
+            if (targetSection) {
+                targetSection.classList.remove('hidden');
+                targetSection.classList.add('active');
+            }
+
+            document.querySelectorAll('.admin-nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('border-white');
+                btn.classList.add('opacity-70');
+                btn.classList.add('border-transparent');
+            });
+
+            const activeBtn = document.querySelector(`.admin-nav-btn[data-target="${target}"]`);
+            if (activeBtn) {
+                activeBtn.classList.add('active');
+                activeBtn.classList.add('border-white');
+                activeBtn.classList.remove('opacity-70');
+                activeBtn.classList.remove('border-transparent');
+            }
+
+            // إيقاف الكاميرا عند الخروج من قسم الباركود
+            if (target !== 'barcode' && isCameraActive) {
+                stopCamera();
+            }
+
+            // عند فتح قسم التقارير، تحديث المخططات
+            if (target === 'reports') {
+                initReportsPage();
+            }
+        }
+
+        // تشغيل الكاميرا
+        async function startCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment" },
+                    audio: false
+                });
+
+                video.srcObject = stream;
+                video.style.display = 'block';
+                cameraPlaceholder.style.display = 'none';
+
+                startBtn.classList.add('hidden');
+                captureBtn.classList.remove('hidden');
+                stopBtn.classList.remove('hidden');
+
+                isCameraActive = true;
+                scannerMessage.textContent = 'الكاميرا جاهزة. انقر على "مسح الباركود"';
+            } catch (err) {
+                scannerMessage.textContent = `حدث خطأ: ${err.message}`;
+                console.error(err);
+            }
+        }
+
+        // مسح الباركود
+        function captureBarcode() {
+            if (!isCameraActive) {
+                scannerMessage.textContent = 'الرجاء تشغيل الكاميرا أولاً';
+                return;
+            }
+
+            const context = canvas.getContext('2d');
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+            // محاكاة مسح الباركود
+            simulateBarcodeScan();
+        }
+
+        // محاكاة مسح الباركود بشكل ذكي
+        function simulateBarcodeScan() {
+            const selectedCentral = document.getElementById('central-filter').value;
+            let candidateDevices;
+
+            if (selectedCentral && selectedCentral !== 'all') {
+                // فلترة الأجهزة حسب السنترال المحدد (مع استثناء الأجهزة المخردة)
+                candidateDevices = devicesData.filter(device =>
+                    device.central === selectedCentral && device.status !== 'scrapped'
+                );
+            } else {
+                // إذا لم يتم تحديد سنترال، استخدم كل الأجهزة غير المخردة
+                candidateDevices = devicesData.filter(device => device.status !== 'scrapped');
+            }
+
+            // التحقق من وجود أجهزة متاحة للمسح في القائمة المفلترة
+            if (candidateDevices.length === 0) {
+                scannerMessage.textContent = 'لا توجد أجهزة متاحة للجرد في هذا السنترال.';
+                // مسح البيانات السابقة
+                document.getElementById('scanned-serial-number').textContent = '-';
+                document.getElementById('scanned-device-type').textContent = '-';
+                document.getElementById('scanned-model').textContent = '-';
+                document.getElementById('scanned-specs').textContent = '-';
+                document.getElementById('scanned-status').textContent = '-';
+                document.getElementById('scanned-current-user').textContent = '-';
+                document.getElementById('scanned-central').textContent = '-';
+                document.getElementById('scanned-device-id').value = '';
+                return; // الخروج من الدالة
+            }
+
+            // اختيار جهاز عشوائي من القائمة المرشحة
+            const device = candidateDevices[Math.floor(Math.random() * candidateDevices.length)];
+
+            // عرض بيانات الجهاز المختار
+            document.getElementById('scanned-serial-number').textContent = device.serial;
+            document.getElementById('scanned-device-type').textContent = getDeviceTypeName(device.type);
+            document.getElementById('scanned-model').textContent = device.model;
+            document.getElementById('scanned-specs').textContent = device.specs || '---';
+
+            let statusText;
+            switch (device.status) {
+                case 'in-use': statusText = 'مستخدم'; break;
+                case 'maintenance': statusText = 'تحت الصيانة'; break;
+                case 'scrapped': statusText = 'مخرد'; break;
+            }
+
+            document.getElementById('scanned-status').textContent = statusText;
+            document.getElementById('scanned-current-user').textContent = device.user || '---';
+            document.getElementById('scanned-central').textContent = device.central || '---';
+            document.getElementById('scanned-device-id').value = device.id;
+
+            scannerMessage.textContent = 'تم مسح الباركود بنجاح';
+        }
+
+        // دالة لتحديث حالة checkbox الجرد
+        function updateInventoryCheckbox(deviceId, isChecked) {
+            const device = devicesData.find(d => d.id === deviceId);
+            if (device) {
+                device.inventoryDone = isChecked;
+
+                // تحديث الواجهة
+                const rows = document.querySelectorAll('#inventory-table-body tr');
+                rows.forEach(row => {
+                    if (row.getAttribute('data-device-id') === deviceId) {
+                        const checkbox = row.querySelector('.inventory-checkbox');
+                        if (checkbox) {
+                            checkbox.checked = isChecked;
+
+                            // إضافة تأثير مرئي
+                            row.classList.toggle('inventory-checked', isChecked);
+
+                            if (isChecked) {
+                                const animation = row.animate(
+                                    [
+                                        { backgroundColor: '#d1fae5' },
+                                        { backgroundColor: 'transparent' }
+                                    ],
+                                    { duration: 1500 }
+                                );
+
+                                animation.onfinish = () => {
+                                    row.classList.add('inventory-checked');
+                                };
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // إيقاف الكاميرا
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                video.srcObject = null;
+                video.style.display = 'none';
+                cameraPlaceholder.style.display = 'flex';
+
+                startBtn.classList.remove('hidden');
+                captureBtn.classList.add('hidden');
+                stopBtn.classList.add('hidden');
+
+                isCameraActive = false;
+                scannerMessage.textContent = 'تم إيقاف الكاميرا. انقر على "تشغيل الكاميرا" لتفعيل الماسح الضوئي';
+            }
+        }
+
+        // تحديث شارة الإشعارات
+        function updateNotificationBadge() {
+            const badge = document.getElementById('notification-badge');
+            if (!badge) return;
+
+            const unreadCount = scrapNotifications.filter(n => !n.read).length;
+
+            if (unreadCount > 0) {
+                badge.textContent = unreadCount;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // عرض الإشعارات
+        function showNotifications() {
+            const container = document.getElementById('notifications-container');
+            const list = document.getElementById('notifications-list');
+
+            container.style.display = 'block';
+            list.innerHTML = '';
+
+            // Reverse the notifications array to show new notifications at the top
+            scrapNotifications.slice().reverse().forEach(notification => {
+                const item = document.createElement('div');
+                item.className = `notification-item ${notification.read ? '' : 'bg-blue-50'}`;
+
+                let title = notification.title;
+                let content = notification.content;
+
+                if (title === 'Device Scrapped') {
+                    title = 'تم تخريد جهاز';
+                }
+                if (content.includes('You scrapped device')) {
+                    const deviceModel = content.match(/device (.*) \(/)[1];
+                    const deviceSerial = content.match(/\((.*)\)/)[1];
+                    content = `تم تخريد جهاز ${deviceModel} (${deviceSerial})`;
+                }
+
+                item.innerHTML = `
+                    <div class="notification-title">${title}</div>
+                    <div class="notification-content">${content}</div>
+                    <div class="notification-time">${notification.time}</div>
+                `;
+
+                item.addEventListener('click', () => {
+                    notification.read = true;
+                    item.classList.remove('bg-blue-50');
+                    updateNotificationBadge();
+                });
+
+                list.appendChild(item);
+            });
+        }
+
+        function populateYearDropdowns() {
+            const inventoryYearSelect = document.getElementById('inventoryYear');
+            const scrapYearSelect = document.getElementById('scrapYear');
+            const currentYear = new Date().getFullYear();
+            const startYear = 2000;
+
+            for (let year = currentYear; year >= startYear; year--) {
+                const option1 = document.createElement('option');
+                option1.value = year;
+                option1.textContent = year;
+                inventoryYearSelect.appendChild(option1);
+
+                const option2 = document.createElement('option');
+                option2.value = year;
+                option2.textContent = year;
+                scrapYearSelect.appendChild(option2);
+            }
+        }
+
+
+        // =====================
+        // تهيئة الصفحة عند التحميل
+        // =====================
+        document.addEventListener('DOMContentLoaded', function () {
+            // عرض الأجهزة
+            displayInventory();
+
+            // تحديث شارة الإشعارات
+            updateNotificationBadge();
+            
+            // تعبئة فلاتر السنوات
+            populateYearDropdowns();
+
+            // معالجة النقر على أزرار الجرد
+            document.addEventListener('click', function (e) {
+                if (e.target.closest('.scrap-btn')) {
+                    const deviceId = e.target.closest('tr').getAttribute('data-device-id');
+                    showScrapModal(deviceId);
+                }
+
+                if (e.target.closest('.edit-device-btn')) {
+                    const deviceId = e.target.closest('tr').getAttribute('data-device-id');
+                    showEditDeviceModal(deviceId);
+                }
+
+                if (e.target.classList.contains('admin-nav-btn')) {
+                    const target = e.target.getAttribute('data-target');
+                    switchAdminSection(target);
+                }
+
+                // تحديث حالة الجرد عند النقر على checkbox
+                if (e.target.classList.contains('inventory-checkbox')) {
+                    const deviceId = e.target.closest('tr').getAttribute('data-device-id');
+                    const isChecked = e.target.checked;
+                    updateInventoryCheckbox(deviceId, isChecked);
+
+                    // إظهار رسالة التأكيد
+                    const message = document.getElementById('inventory-done-message');
+                    message.style.display = 'block';
+                    setTimeout(() => {
+                        message.style.display = 'none';
+                    }, 3000);
+                }
+            });
+
+            // معالجة تأكيد التخريد
+            document.getElementById('confirmScrap').addEventListener('click', function (e) {
+                e.preventDefault();
+                const receiptFile = document.getElementById('scrap-receipt').files[0];
+                if (!receiptFile) {
+                    alert('الرجاء إرفاق إيصال التخريد');
+                    return;
+                }
+
+                if (currentScrapDeviceId) {
+                    scrapDevice(currentScrapDeviceId);
+                }
+            });
+
+            // معالجة إلغاء التخريد
+            document.getElementById('cancelScrap').addEventListener('click', hideScrapModal);
+            document.getElementById('closeScrapModal').addEventListener('click', hideScrapModal);
+
+            // معالجة إغلاق نافذة نجاح التخريد
+            document.getElementById('closeScrapSuccess').addEventListener('click', hideScrapSuccessModal);
+            document.getElementById('scrapSuccessModal').addEventListener('click', function (e) {
+                if (e.target === this) {
+                    hideScrapSuccessModal();
+                }
+            });
+
+            // معالجة إضافة جهاز جديد
+            document.getElementById('add-inventory-btn').addEventListener('click', showAddDeviceModal);
+            document.getElementById('closeAddDeviceModal').addEventListener('click', hideAddDeviceModal);
+            document.getElementById('cancelAddDevice').addEventListener('click', hideAddDeviceModal);
+
+            // زر مسح الرقم التسلسلي
+            document.getElementById('scan-serial-btn').addEventListener('click', function() {
+                hideAddDeviceModal();
+                switchAdminSection('barcode');
+                // Optional: Automatically start the camera
+                setTimeout(() => {
+                    startCamera();
+                    scannerMessage.textContent = 'وجه الكاميرا نحو باركود الرقم التسلسلي';
+                }, 300);
+            });
+
+
+            // إظهار/إخفاء حقول المواصفات حسب نوع الجهاز
+            document.getElementById('new-device-type').addEventListener('change', function () {
+                const type = this.value;
+                const specsFields = document.getElementById('specs-fields');
+                const ramInput = document.getElementById('new-device-ram');
+                const hddInput = document.getElementById('new-device-hdd');
+
+                if (type === 'laptop' || type === 'desktop') {
+                    specsFields.classList.remove('hidden');
+                    ramInput.required = true;
+                    hddInput.required = true;
+                } else {
+                    specsFields.classList.add('hidden');
+                    ramInput.required = false;
+                    hddInput.required = false;
+                }
+            });
+
+            // معالجة حفظ الجهاز الجديد
+            document.getElementById('addDeviceForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const type = document.getElementById('new-device-type').value;
+                const model = document.getElementById('new-device-model').value;
+                const serial = document.getElementById('new-device-serial').value;
+                const employeeId = document.getElementById('new-device-employee-id').value;
+                const user = document.getElementById('new-device-user').value;
+                const central = document.getElementById('new-device-central').value;
+                const receiptDate = document.getElementById('new-device-receipt-date').value;
+
+                if (!type || !model || !serial || !receiptDate || !employeeId || !user) {
+                    alert('الرجاء ملء جميع الحقول الإلزامية (*)');
+                    return;
+                }
+
+                // توليد مواصفات الجهاز
+                let specs = '';
+                if (type === 'laptop' || type === 'desktop') {
+                    const ram = document.getElementById('new-device-ram').value;
+                    const hdd = document.getElementById('new-device-hdd').value;
+                    if (ram && hdd) {
+                        specs = `رام: ${ram} | هارد: ${hdd}`;
+                    } else {
+                        alert('الرجاء اختيار مواصفات الجهاز (الرام والهارد)');
+                        return;
+                    }
+                }
+
+                const newDevice = {
+                    id: String(devicesData.length + 1).padStart(3, '0'),
+                    type: type,
+                    model: model,
+                    serial: serial,
+                    status: 'in-use', // **الحالة دائما "مستخدم"**
+                    employeeId: employeeId,
+                    user: user,
+                    central: central,
+                    notes: document.getElementById('new-device-notes').value,
+                    inventoryDone: false,
+                    specs: specs
+                };
+
+                devicesData.push(newDevice);
+                displayInventory();
+                hideAddDeviceModal();
+                alert('تمت إضافة الجهاز بنجاح!');
+            });
+
+            // معالجة تعديل الجهاز
+            document.getElementById('closeEditDeviceModal').addEventListener('click', hideEditDeviceModal);
+            document.getElementById('cancelEditDevice').addEventListener('click', hideEditDeviceModal);
+
+            // معالجة حفظ التعديلات
+            document.getElementById('editDeviceForm').addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const deviceId = document.getElementById('edit-device-id').value;
+                const newStatus = document.getElementById('edit-device-status').value;
+                const newEmployeeId = document.getElementById('edit-device-employee-id').value;
+                const newCentral = document.getElementById('edit-device-central').value;
+
+                const deviceIndex = devicesData.findIndex(item => item.id === deviceId);
+                if (deviceIndex > -1) {
+                    devicesData[deviceIndex].status = newStatus;
+                    devicesData[deviceIndex].employeeId = newEmployeeId;
+                    devicesData[deviceIndex].central = newCentral;
+                    displayInventory();
+                    // Optional: Show a success message
+                    alert('تم تحديث بيانات الجهاز بنجاح');
+                } else {
+                    alert('خطأ: لم يتم العثور على الجهاز لتحديثه.');
+                }
+
+                hideEditDeviceModal();
+            });
+
+
+            // معالجة تسجيل الخروج
+            document.getElementById('admin-logout-btn').addEventListener('click', function () {
+                // إيقاف الكاميرا قبل الخروج
+                stopCamera();
+                window.location.href = 'index.html';
+            });
+
+            // معالجة اختيار ملف الإيصال
+            document.getElementById('receipt-upload').addEventListener('change', function (e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
+                document.getElementById('receipt-file-name').value = fileName;
+            });
+
+            // ================================================
+            // الأحداث للأزرار في قسم مسح الباركود
+            // ================================================
+
+            // زر "تم الجرد"
+            document.getElementById('inventory-done-btn').addEventListener('click', function () {
+                const deviceId = document.getElementById('scanned-device-id').value;
+
+                if (deviceId) {
+                    // تحديث حالة الجرد في الجدول
+                    updateInventoryCheckbox(deviceId, true);
+
+                    const message = document.getElementById('inventory-done-message');
+                    message.style.display = 'block';
+
+                    // إخفاء الرسالة بعد 3 ثوان
+                    setTimeout(() => {
+                        message.style.display = 'none';
+                    }, 3000);
+                } else {
+                    alert('الرجاء مسح باركود جهاز أولاً');
+                }
+            });
+
+            // زر "تعديل"
+            document.getElementById('edit-scanned-device-btn').addEventListener('click', function () {
+                const deviceId = document.getElementById('scanned-device-id').value;
+
+                if (deviceId) {
+                    showEditDeviceModal(deviceId);
+                } else {
+                    alert('الرجاء مسح باركود جهاز أولاً');
+                }
+            });
+
+            // زر "تخريد"
+            document.getElementById('delete-scanned-device-btn').addEventListener('click', () => {
+                const deviceId = document.getElementById('scanned-device-id').value;
+                if (deviceId) {
+                    showScrapModal(deviceId);
+                } else {
+                    alert('لم يتم تحديد جهاز للتخريد. يرجى مسح باركود أولاً.');
+                }
+            });
+
+
+            // معالجة أزرار الكاميرا
+            startBtn.addEventListener('click', startCamera);
+            captureBtn.addEventListener('click', captureBarcode);
+            stopBtn.addEventListener('click', stopCamera);
+
+            // أحداث التقارير
+            document.getElementById('applyFilters').addEventListener('click', applyReportFilters);
+            document.getElementById('resetFilters').addEventListener('click', resetReportFilters);
+            document.getElementById('exportReport').addEventListener('click', exportReport);
+            document.getElementById('searchInput').addEventListener('keyup', searchReportTable);
+
+            // إظهار/إخفاء فلاتر المواصفات في قسم العهد
+            document.getElementById('deviceType').addEventListener('change', function () {
+                const specsFilters = document.getElementById('inventory-specs-filters');
+                if (this.value === 'laptop' || this.value === 'desktop') {
+                    specsFilters.classList.remove('hidden');
+                } else {
+                    specsFilters.classList.add('hidden');
+                    // Reset and apply filters when hiding
+                    document.getElementById('inventory-ram-filter').value = 'all';
+                    document.getElementById('inventory-hdd-filter').value = 'all';
+                }
+            });
+
+            // إظهار/إخفاء فلاتر المواصفات في قسم المخردات
+            document.getElementById('scrapDeviceType').addEventListener('change', function () {
+                const specsFilters = document.getElementById('scrap-specs-filters');
+                if (this.value === 'laptop' || this.value === 'desktop') {
+                    specsFilters.classList.remove('hidden');
+                } else {
+                    specsFilters.classList.add('hidden');
+                    // Reset and apply filters when hiding
+                    document.getElementById('scrap-ram-filter').value = 'all';
+                    document.getElementById('scrap-hdd-filter').value = 'all';
+                }
+            });
+
+            // أحداث Radio Buttons
+            document.querySelectorAll('input[name="searchType"]').forEach(radio => {
+                radio.addEventListener('change', function () {
+                    toggleSearchSections();
+                    applyReportFilters();
+                });
+            });
+
+            // أحداث التصفية في قسم العهد
+            document.getElementById('central-filter').addEventListener('change', displayInventory);
+            document.getElementById('inventory-search').addEventListener('input', displayInventory);
+
+            // تهيئة قسم التقارير
+            initReportsPage();
+
+            // أحداث الجرس والإشعارات
+            document.getElementById('notification-btn').addEventListener('click', function () {
+                showNotifications();
+            });
+
+            // إغلاق الإشعارات عند النقر خارجها
+            document.addEventListener('click', function (e) {
+                const notifications = document.getElementById('notifications-container');
+                const bell = document.getElementById('notification-btn');
+
+                if (notifications.style.display === 'block' &&
+                    !notifications.contains(e.target) &&
+                    !bell.contains(e.target)) {
+                    notifications.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
+}
+أريد منك أن تجعل حقل الرقم التسلسلي في شاشة إضافة جهاز جديد في المنتصف ويكون شكله جذاب وايضا أيقونة qr code اجعلها في المنتصف أيضا وعندما أقوم بمسح الباركود الخاص بالرقم التسلسلي من شاشة مسح الباركود ويظهر لي الرقم التسلسلي أريد منك أن تضع لي زر بجانب تعديل وتخريد وتم الجرد اسمه نقل البيانات إلى شاشة إضافة جهاز جديد وعندما أضغط عليه ينقلني إلى شاشة إضافة جهاز جديد ويضع لي الرقم التسلسلي الذي تم مسحه في حقل الرقم التسلسلي وايضا أريد منك أن تعدل على شاشة التقارير بحيث يكون البحث في العهد والبحث في المخردات بجانب بعضهما البعض وايضا الفلاتر الخاصة بالبحث في العهد والبحث في المخردات اجعلها تحت كل منهما
