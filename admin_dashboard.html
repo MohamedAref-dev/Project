@@ -729,6 +729,22 @@
                                             البحث في المخردات
                                         </label>
                                     </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="request-modify" name="searchType" value="modify"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                        <label for="request-modify"
+                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                            طلب تعديل عهدة
+                                        </label>
+                                    </div>
+                                    <div class="flex items-center">
+                                        <input type="radio" id="request-scrap" name="searchType" value="request_scrap"
+                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500">
+                                        <label for="request-scrap"
+                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
+                                            طلب تخريد عهدة
+                                        </label>
+                                    </div>
                                 </div>
                             </div>
 
@@ -870,6 +886,86 @@
                                         </select>
                                     </div>
                                 </div>
+                            </div>
+                            
+                            <div id="modify-request-section" class="mb-6 hidden">
+                                <h3 class="text-md font-medium text-yellow-700 mb-3 border-b border-yellow-200 pb-2">✏️ طلب تعديل عهدة</h3>
+                                <form id="modify-request-form" class="space-y-4">
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="modify-request-device" class="block text-sm font-medium text-gray-700 mb-1">اختر
+                                            الجهاز</label>
+                                        <select id="modify-request-device"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                            required>
+                                            <option value="">-- اختر الجهاز --</option>
+                                        </select>
+                                    </div>
+            
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="modify-request-receipt-upload" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التسليم</label>
+                                        <div class="flex items-center">
+                                            <input type="file" id="modify-request-receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                            <input type="text" id="modify-request-receipt-file-name"
+                                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
+                                                placeholder="لم يتم اختيار ملف" readonly>
+                                            <button type="button" onclick="document.getElementById('modify-request-receipt-upload').click()"
+                                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
+                                                اختر ملف
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">يرجى إرفاق إيصال التسليم</p>
+                                    </div>
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="modify-request-notes"
+                                            class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                                        <textarea id="modify-request-notes" rows="3"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                            placeholder="أدخل ملاحظاتك هنا" required></textarea>
+                                    </div>
+                                    <div class="mt-4">
+                                        <button type="submit" class="btn-primary w-full">إرسال طلب التعديل</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div id="scrap-request-section" class="mb-6 hidden">
+                                <h3 class="text-md font-medium text-red-700 mb-3 border-b border-red-200 pb-2">🗑️ طلب تخريد عهدة</h3>
+                                <form id="scrap-request-form" class="space-y-4">
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="scrap-request-device" class="block text-sm font-medium text-gray-700 mb-1">اختر
+                                            الجهاز</label>
+                                        <select id="scrap-request-device"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                            required>
+                                            <option value="">-- اختر الجهاز --</option>
+                                        </select>
+                                    </div>
+            
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="scrap-request-receipt-upload" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التخريد</label>
+                                        <div class="flex items-center">
+                                            <input type="file" id="scrap-request-receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                            <input type="text" id="scrap-request-receipt-file-name"
+                                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
+                                                placeholder="لم يتم اختيار ملف" readonly>
+                                            <button type="button" onclick="document.getElementById('scrap-request-receipt-upload').click()"
+                                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
+                                                اختر ملف
+                                            </button>
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">يرجى إرفاق إيصال التخريد</p>
+                                    </div>
+                                    <div class="mb-3 sm:mb-4">
+                                        <label for="scrap-request-notes"
+                                            class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                                        <textarea id="scrap-request-notes" rows="3"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
+                                            placeholder="أدخل ملاحظاتك هنا" required></textarea>
+                                    </div>
+                                     <div class="mt-4">
+                                        <button type="submit" class="btn-danger w-full">إرسال طلب التخريد</button>
+                                    </div>
+                                </form>
                             </div>
 
                             <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -1873,8 +1969,7 @@
 
             // إعادة تعيين Radio Buttons
             document.getElementById('search-inventory').checked = true;
-            document.getElementById('inventory-search-section').classList.remove('hidden');
-            document.getElementById('scrap-search-section').classList.add('hidden');
+            toggleSearchSections();
 
             // تطبيق الفلاتر بعد الإعادة
             initReportsPage();
@@ -1884,13 +1979,22 @@
         // دالة لإظهار/إخفاء أقسام الفلاتر بناءً على الاختيار
         function toggleSearchSections() {
             const searchType = document.querySelector('input[name="searchType"]:checked').value;
+            const sections = {
+                inventory: 'inventory-search-section',
+                scrap: 'scrap-search-section',
+                modify: 'modify-request-section',
+                request_scrap: 'scrap-request-section'
+            };
 
-            if (searchType === 'inventory') {
-                document.getElementById('inventory-search-section').classList.remove('hidden');
-                document.getElementById('scrap-search-section').classList.add('hidden');
-            } else {
-                document.getElementById('inventory-search-section').classList.add('hidden');
-                document.getElementById('scrap-search-section').classList.remove('hidden');
+            // Hide all sections first
+            Object.values(sections).forEach(id => {
+                document.getElementById(id)?.classList.add('hidden');
+            });
+            
+            // Show the selected section
+            const selectedSectionId = sections[searchType];
+            if(selectedSectionId) {
+                document.getElementById(selectedSectionId).classList.remove('hidden');
             }
         }
 
@@ -2252,6 +2356,7 @@
             // عند فتح قسم التقارير، تحديث المخططات
             if (target === 'reports') {
                 initReportsPage();
+                toggleSearchSections();
             }
         }
 
@@ -2466,6 +2571,31 @@
                 scrapYearSelect.appendChild(option2);
             }
         }
+        
+        function populateDeviceDropdowns() {
+            const selects = [
+                document.getElementById('modify-request-device'),
+                document.getElementById('scrap-request-device')
+            ];
+
+            selects.forEach(select => {
+                if(!select) return;
+                // Clear existing options except the first one
+                while (select.options.length > 1) {
+                    select.remove(1);
+                }
+
+                // Populate with devices
+                devicesData.forEach(device => {
+                    if(device.status !== 'scrapped'){
+                        const option = document.createElement('option');
+                        option.value = device.id;
+                        option.textContent = `${getDeviceTypeName(device.type)} - ${device.serial} (${device.user})`;
+                        select.appendChild(option);
+                    }
+                });
+            });
+        }
 
 
         // =====================
@@ -2480,6 +2610,9 @@
 
             // تعبئة فلاتر السنوات
             populateYearDropdowns();
+            
+            // تعبئة قوائم الأجهزة في نماذج الطلبات
+            populateDeviceDropdowns();
 
             // معالجة النقر على أزرار الجرد
             document.addEventListener('click', function (e) {
@@ -2652,6 +2785,33 @@
                 hideEditDeviceModal();
             });
 
+            // --- بداية الكود المضاف ---
+            // معالجة إرسال طلب التعديل
+            document.getElementById('modify-request-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const deviceId = document.getElementById('modify-request-device').value;
+                if (!deviceId) {
+                    alert('الرجاء اختيار جهاز أولاً.');
+                    return;
+                }
+                alert('تم إرسال طلب التعديل بنجاح، ستتم مراجعته من قبل المسؤول.');
+                this.reset();
+                document.getElementById('modify-request-receipt-file-name').value = "لم يتم اختيار ملف";
+            });
+
+            // معالجة إرسال طلب التخريد
+            document.getElementById('scrap-request-form').addEventListener('submit', function (e) {
+                e.preventDefault();
+                const deviceId = document.getElementById('scrap-request-device').value;
+                if (!deviceId) {
+                    alert('الرجاء اختيار جهاز أولاً.');
+                    return;
+                }
+                alert('تم إرسال طلب التخريد بنجاح، ستتم مراجعته من قبل المسؤول.');
+                this.reset();
+                document.getElementById('scrap-request-receipt-file-name').value = "لم يتم اختيار ملف";
+            });
+            // --- نهاية الكود المضاف ---
 
             // معالجة تسجيل الخروج
             document.getElementById('admin-logout-btn').addEventListener('click', function () {
@@ -2664,6 +2824,14 @@
             document.getElementById('receipt-upload').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
                 document.getElementById('receipt-file-name').value = fileName;
+            });
+             document.getElementById('modify-request-receipt-upload').addEventListener('change', function(e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
+                document.getElementById('modify-request-receipt-file-name').value = fileName;
+            });
+            document.getElementById('scrap-request-receipt-upload').addEventListener('change', function(e) {
+                const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
+                document.getElementById('scrap-request-receipt-file-name').value = fileName;
             });
 
             // ================================================
@@ -2753,7 +2921,7 @@
             document.querySelectorAll('input[name="searchType"]').forEach(radio => {
                 radio.addEventListener('change', function () {
                     toggleSearchSections();
-                    applyReportFilters();
+                    applyReportFilters(); // Optional: re-apply filters on section change
                 });
             });
 
@@ -2763,6 +2931,7 @@
 
             // تهيئة قسم التقارير
             initReportsPage();
+             toggleSearchSections();
 
             // أحداث الجرس والإشعارات
             document.getElementById('notification-btn').addEventListener('click', function () {
