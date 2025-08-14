@@ -321,7 +321,11 @@
 
                     <div class="flex items-center space-x-6 space-x-reverse mb-4 pb-4 border-b border-gray-200">
                         <div class="flex items-center">
-                            <input type="radio" id="modify-request" name="request-type" value="modify" class="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out" checked>
+                            <input type="radio" id="upgrade-request" name="request-type" value="upgrade" class="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out" checked>
+                            <label for="upgrade-request" class="mr-2 text-sm font-medium text-gray-800 cursor-pointer">رفع كفاءة</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="modify-request" name="request-type" value="modify" class="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out">
                             <label for="modify-request" class="mr-2 text-sm font-medium text-gray-800 cursor-pointer">طلب تعديل العهدة</label>
                         </div>
                         <div class="flex items-center">
@@ -343,7 +347,7 @@
                                 </select>
                         </div>
 
-                        <div class="mb-3 sm:mb-4">
+                        <div class="mb-3 sm:mb-4" id="receipt-container">
                             <label for="receipt-upload" id="receipt-label" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التسليم</label>
                             <div class="flex items-center">
                                 <input type="file" id="receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
@@ -357,7 +361,7 @@
                             </div>
                             <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
                         </div>
-                        <div class="mb-3 sm:mb-4">
+                        <div class="mb-3 sm:mb-4" id="notes-container">
                             <label for="issue-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
                             <textarea id="issue-notes" rows="3"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
@@ -482,17 +486,49 @@
             document.getElementById('receipt-file-name').value = fileName;
         });
 
-        // --- START: NEW SCRIPT FOR RADIO BUTTONS ---
+        // --- START: MODIFIED SCRIPT FOR RADIO BUTTONS ---
         const modifyRadio = document.getElementById('modify-request');
         const scrapRadio = document.getElementById('scrap-request');
+        const upgradeRadio = document.getElementById('upgrade-request');
+
         const receiptLabel = document.getElementById('receipt-label');
         const submitText = document.getElementById('submit-text');
 
+        const receiptContainer = document.getElementById('receipt-container');
+        const notesContainer = document.getElementById('notes-container');
+        const deviceSelect = document.getElementById('issue-device');
+
         function updateFormUI() {
-            if (modifyRadio.checked) {
+            // Reset visibility for all elements first
+            receiptContainer.style.display = 'block';
+            notesContainer.style.display = 'block';
+
+            // Reset visibility for all device options
+            Array.from(deviceSelect.options).forEach(option => {
+                option.style.display = '';
+            });
+
+            if (upgradeRadio.checked) {
+                receiptContainer.style.display = 'none';
+                notesContainer.style.display = 'none';
+                submitText.textContent = 'إرسال طلب رفع كفاءة';
+
+                // Filter device options for upgrade
+                Array.from(deviceSelect.options).forEach(option => {
+                    if (option.value === "") return; // Always show the placeholder
+                    const isMovable = option.textContent.includes('لابتوب') || option.textContent.includes('جهاز كمبيوتر');
+                    option.style.display = isMovable ? '' : 'none';
+                });
+                
+                // If current selection is now hidden, reset dropdown
+                if(deviceSelect.options[deviceSelect.selectedIndex].style.display === 'none'){
+                   deviceSelect.value = "";
+                }
+
+            } else if (modifyRadio.checked) {
                 receiptLabel.textContent = 'إرفاق إيصال التسليم';
                 submitText.textContent = 'إرسال طلب التعديل';
-            } else {
+            } else if (scrapRadio.checked) {
                 receiptLabel.textContent = 'إرفاق إيصال التخريد';
                 submitText.textContent = 'إرسال طلب التخريد';
             }
@@ -500,7 +536,8 @@
 
         modifyRadio.addEventListener('change', updateFormUI);
         scrapRadio.addEventListener('change', updateFormUI);
-        // --- END: NEW SCRIPT FOR RADIO BUTTONS ---
+        upgradeRadio.addEventListener('change', updateFormUI);
+        // --- END: MODIFIED SCRIPT FOR RADIO BUTTONS ---
 
 
         // معالجة إرسال النموذج مع Popup
@@ -515,9 +552,16 @@
             const selectedDeviceName = deviceSelect.options[deviceSelect.selectedIndex].text;
             const selectedDeviceValue = deviceSelect.value;
             
-            // تحديد نوع الطلب من الـ radio button
             const requestType = document.querySelector('input[name="request-type"]:checked').value;
-            const requestTypeText = requestType === 'modify' ? 'التعديل' : 'التخريد';
+            let requestTypeText;
+            if (requestType === 'modify') {
+                requestTypeText = 'التعديل';
+            } else if (requestType === 'scrap') {
+                requestTypeText = 'التخريد';
+            } else {
+                requestTypeText = 'رفع الكفاءة';
+            }
+
 
             // عرض حالة التحميل
             document.getElementById('submit-text').classList.add('hidden');

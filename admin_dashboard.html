@@ -888,8 +888,8 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-6 mb-6 sm:mb-8">
+                        <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
                                 <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">💻</div>
                                 <h3 class="text-sm sm:text-lg font-semibold text-gray-800">أجهزة كمبيوتر</h3>
                                 <p class="text-lg sm:text-2xl font-bold text-blue-600" id="computerCount">0</p>
@@ -929,7 +929,17 @@
                                     <p class="text-sm sm:text-lg font-bold text-orange-800" id="printerNewCount">+0</p>
                                 </div>
                             </div>
-                        </div>
+                            <div class="bg-white rounded-xl shadow-lg p-3 sm:p-6 text-center mobile-card stat-card">
+                                <div class="text-2xl sm:text-3xl mb-1 sm:mb-2">📱</div>
+                                <h3 class="text-sm sm:text-lg font-semibold text-gray-800">تابلت</h3>
+                                <p class="text-lg sm:text-2xl font-bold text-pink-600" id="tabletCount">0</p>
+                                <p class="text-xs sm:text-sm text-gray-500">إجمالي التابلت</p>
+                                <div class="mt-2 p-2 bg-pink-50 rounded-lg">
+                                    <p class="text-xs sm:text-sm text-pink-700 font-medium">جديد هذا الشهر</p>
+                                    <p class="text-sm sm:text-lg font-bold text-pink-800" id="tabletNewCount">+0</p>
+                                </div>
+                            </div>
+                            </div>
 
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 mb-6 sm:mb-8">
                             <div class="bg-white rounded-xl shadow-lg p-4 sm:p-6 mobile-card report-section">
@@ -1357,6 +1367,7 @@
         let deviceStatusChart = null;
         let deviceTypeChart = null;
         let centralDistributionChart = null;
+        let currentFilteredReportData = [];
 
         // متغيرات الكاميرا
         const video = document.getElementById('video');
@@ -1537,21 +1548,17 @@
             { "id": "150", "employeeId": "1150", "type": "tablet", "model": "Lenovo Tab P12 Pro", "serial": "TA00000150", "status": "in-use", "user": "سعيد العتيبي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" }
         ];
 
-        // --- بداية الكود المعدل ---
-        // بيانات الإشعارات الخاصة بالمسؤول
         const adminNotifications = [
             { id: 4, title: "طلب تعديل عهدة", content: "تم إرسال طلب التعديل من رقم العامل: 1001 لجهاز: لابتوب - HP ProBook 450 G8", time: "الآن", read: false },
             { id: 3, title: "تخريد جهاز", content: "تم تخريد طابعة HP LaserJet Pro M404n", time: "قبل 30 دقيقة", read: false },
             { id: 2, title: "تخريد جهاز", content: "تم تخريد شاشة Dell UltraSharp U2722D", time: "قبل ساعة", read: true },
             { id: 1, title: "طلب تعديل عهدة", content: "تم إرسال طلب التعديل من رقم العامل: 1002 لجهاز: جهاز كمبيوتر - HP EliteDesk 800 G5", time: "قبل 4 ساعات", read: true }
         ];
-        // --- نهاية الكود المعدل ---
-
+        
         // =====================================
-        // كود التقارير والإحصائيات - مع التعديلات
+        // كود التقارير والإحصائيات
         // =====================================
 
-        // دالة لإنشاء بيانات التقارير من بيانات الأجهزة
         function generateReportData() {
             return devicesData.map(device => {
                 const inventoryDate = new Date();
@@ -1574,16 +1581,13 @@
                     scrapDate: device.status === 'scrapped' ? device.scrapDate || 'تاريخ التخريد غير محدد' : null,
                     status: device.status,
                     area: device.central,
-                    inventoryYear: new Date().getFullYear(), // Simplified for example
-                    specs: device.specs // **تمت إضافة المواصفات هنا**
+                    inventoryYear: new Date().getFullYear(), 
+                    specs: device.specs
                 };
             });
         }
 
-
-        // تهيئة المخططات للتقارير مع البيانات المفلترة
         function initReportsCharts(reportData) {
-            // مخطط توزيع الأجهزة حسب النوع
             const deviceCtx = document.getElementById('deviceChart').getContext('2d');
             const deviceCounts = {
                 laptop: reportData.filter(d => d.type === 'laptop').length,
@@ -1684,7 +1688,6 @@
                 }
             });
 
-            // مخطط حالة الأجهزة
             const statusCtx = document.getElementById('statusChart').getContext('2d');
             const statusCounts = {
                 'in-use': reportData.filter(d => d.status === 'in-use').length,
@@ -1791,7 +1794,6 @@
             });
         }
 
-        // تحديث الجدول بالبيانات المفلترة
         function updateReportTable(reportData) {
             const tbody = document.getElementById('deviceTableBody');
             tbody.innerHTML = '';
@@ -1819,26 +1821,29 @@
             });
         }
 
-        // تحديث الإحصائيات بالبيانات المفلترة
+        // --- بداية الكود المعدل ---
         function updateReportStats(reportData) {
             const stats = {
                 computer: reportData.filter(d => d.type === 'desktop').length,
                 monitor: reportData.filter(d => d.type === 'monitor').length,
                 laptop: reportData.filter(d => d.type === 'laptop').length,
                 printer: reportData.filter(d => d.type === 'printer').length,
+                tablet: reportData.filter(d => d.type === 'tablet').length,
                 scrapped: reportData.filter(d => d.status === 'scrapped').length,
                 active: reportData.filter(d => d.status === 'in-use').length,
                 maintenance: reportData.filter(d => d.status === 'maintenance').length,
                 computerNew: reportData.filter(d => d.type === 'desktop' && d.isNew).length || 0,
                 monitorNew: reportData.filter(d => d.type === 'monitor' && d.isNew).length || 0,
                 laptopNew: reportData.filter(d => d.type === 'laptop' && d.isNew).length || 0,
-                printerNew: reportData.filter(d => d.type === 'printer' && d.isNew).length || 0
+                printerNew: reportData.filter(d => d.type === 'printer' && d.isNew).length || 0,
+                tabletNew: reportData.filter(d => d.type === 'tablet' && d.isNew).length || 0
             };
 
             document.getElementById('computerCount').textContent = stats.computer;
             document.getElementById('monitorCount').textContent = stats.monitor;
             document.getElementById('laptopCount').textContent = stats.laptop;
             document.getElementById('printerCount').textContent = stats.printer;
+            document.getElementById('tabletCount').textContent = stats.tablet;
             document.getElementById('activeDevices').textContent = stats.active;
             document.getElementById('maintenanceDevices').textContent = stats.maintenance;
             document.getElementById('scrappedDevices').textContent = stats.scrapped;
@@ -1847,22 +1852,20 @@
             document.getElementById('monitorNewCount').textContent = '+' + stats.monitorNew;
             document.getElementById('laptopNewCount').textContent = '+' + stats.laptopNew;
             document.getElementById('printerNewCount').textContent = '+' + stats.printerNew;
+            document.getElementById('tabletNewCount').textContent = '+' + stats.tabletNew;
 
-            // تحديث شريط تقدم الأجهزة المخردة
             const totalDevices = reportData.length > 0 ? reportData.length : devicesData.length;
             const scrappedPercentage = totalDevices > 0 ? Math.round((stats.scrapped / totalDevices) * 100) : 0;
             document.getElementById('scrap-progress-bar').style.width = scrappedPercentage + '%';
             document.getElementById('scrap-percentage').textContent = scrappedPercentage + '%';
         }
+        // --- نهاية الكود المعدل ---
 
-        // تطبيق الفلاتر
         function applyReportFilters() {
             const searchType = document.querySelector('input[name="searchType"]:checked').value;
-            // توليد البيانات الأصلية
             const allReportData = generateReportData();
             let filteredReportData;
 
-            // فلترة البيانات
             if (searchType === 'inventory') {
                 const deviceType = document.getElementById('deviceType').value;
                 const area = document.getElementById('area').value;
@@ -1885,7 +1888,7 @@
                     return typeMatch && areaMatch && yearMatch && specsMatch;
                 });
 
-            } else { // searchType === 'scrap'
+            } else { 
                 const scrapDeviceType = document.getElementById('scrapDeviceType').value;
                 const scrapArea = document.getElementById('scrapArea').value;
                 const scrapYear = document.getElementById('scrapYear').value;
@@ -1908,13 +1911,13 @@
                     return statusMatch && typeMatch && areaMatch && yearMatch && specsMatch;
                 });
             }
+            
+            currentFilteredReportData = filteredReportData;
 
-            // تحديث المكونات بالبيانات المفلترة
             updateReportTable(filteredReportData);
             updateReportStats(filteredReportData);
             initReportsCharts(filteredReportData);
 
-            // إضافة تأثير تمييز للصفوف
             document.querySelectorAll('#deviceTableBody tr').forEach(row => {
                 row.classList.add('highlight-row');
                 setTimeout(() => {
@@ -1922,11 +1925,8 @@
                 }, 2000);
             });
         }
-
-
-        // إعادة تعيين الفلاتر
+        
         function resetReportFilters() {
-            // Reset inventory filters
             document.getElementById('deviceType').value = 'all';
             document.getElementById('area').value = 'all';
             document.getElementById('inventoryYear').value = 'all';
@@ -1934,7 +1934,6 @@
             document.getElementById('inventory-hdd-filter').value = 'all';
             document.getElementById('inventory-specs-filters').classList.add('hidden');
 
-            // Reset scrap filters
             document.getElementById('scrapDeviceType').value = 'all';
             document.getElementById('scrapArea').value = 'all';
             document.getElementById('scrapYear').value = 'all';
@@ -1942,17 +1941,15 @@
             document.getElementById('scrap-hdd-filter').value = 'all';
             document.getElementById('scrap-specs-filters').classList.add('hidden');
 
-            // إعادة تعيين Radio Buttons
             document.getElementById('search-inventory').checked = true;
             document.getElementById('inventory-search-section').classList.remove('hidden');
             document.getElementById('scrap-search-section').classList.add('hidden');
 
-            // تطبيق الفلاتر بعد الإعادة
+            currentFilteredReportData = [];
+            
             initReportsPage();
         }
-
-
-        // دالة لإظهار/إخفاء أقسام الفلاتر بناءً على الاختيار
+        
         function toggleSearchSections() {
             const searchType = document.querySelector('input[name="searchType"]:checked').value;
 
@@ -1965,13 +1962,15 @@
             }
         }
 
-        // تصدير التقرير
         function exportReport() {
-            // توليد البيانات الأصلية
-            const allReportData = generateReportData();
+            if (currentFilteredReportData.length === 0) {
+                alert('الرجاء تطبيق الفلاتر أولاً لعرض بيانات يمكن تصديرها.');
+                return;
+            }
 
-            // تحضير البيانات للتصدير
-            const excelData = allReportData.map(device => ({
+            const dataToExport = currentFilteredReportData;
+            
+            const excelData = dataToExport.map(device => ({
                 'رقم العامل': device.employeeId,
                 'اسم المستخدم': device.name,
                 'نوع الجهاز': getDeviceTypeName(device.type),
@@ -1984,23 +1983,17 @@
                     device.status === 'maintenance' ? 'تحت الصيانة' : 'مخرد'
             }));
 
-            // إنشاء مصنف Excel
             const wb = XLSX.utils.book_new();
-
-            // إنشاء ورقة عمل من البيانات
+            
             const ws = XLSX.utils.json_to_sheet(excelData);
-
-            // إضافة ورقة العمل إلى المصنف
-            XLSX.utils.book_append_sheet(wb, ws, "تقرير الأجهزة");
-
-            // تصدير الملف
-            XLSX.writeFile(wb, `تقرير_الأجهزة_${new Date().toISOString().split('T')[0]}.xlsx`);
-
-            // إظهار رسالة تأكيد
-            alert('تم تصدير التقرير بنجاح! 📥 سيتم تنزيل ملف Excel قريبًا');
+            
+            XLSX.utils.book_append_sheet(wb, ws, "تقرير الأجهزة المفلتر");
+            
+            XLSX.writeFile(wb, `تقرير_الأجهزة_المفلتر_${new Date().toISOString().split('T')[0]}.xlsx`);
+            
+            alert('تم تصدير التقرير المفلتر بنجاح! 📥 سيتم تنزيل ملف Excel قريبًا');
         }
 
-        // البحث في الجدول
         function searchReportTable() {
             const searchTerm = document.getElementById('searchInput').value.toLowerCase();
             const tbody = document.getElementById('deviceTableBody');
@@ -2026,27 +2019,25 @@
                 }
             }
         }
-
-        // تنسيق التاريخ
+        
         function formatDate(date) {
             const year = date.getFullYear();
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const day = String(date.getDate()).padStart(2, '0');
             return `${year}-${month}-${day}`;
         }
-
-        // تهيئة صفحة التقارير
+        
         function initReportsPage() {
+            currentFilteredReportData = [];
             updateReportTable([]);
             updateReportStats([]);
             initReportsCharts([]);
         }
 
         // =====================================
-        // بقية الكود كما هو مع التعديلات على التخريد
+        // بقية الكود
         // =====================================
 
-        // عرض الأجهزة في الجدول
         function displayInventory() {
             inventoryTableBody.innerHTML = '';
 
@@ -2055,15 +2046,12 @@
 
             let filteredDevices = [...devicesData];
 
-            // Filter by central
             if (selectedCentral !== 'all') {
                 filteredDevices = filteredDevices.filter(device => device.central === selectedCentral);
             }
 
-            // Exclude scrapped devices by default
             filteredDevices = filteredDevices.filter(device => device.status !== 'scrapped');
 
-            // Filter by search term
             if (searchTerm) {
                 filteredDevices = filteredDevices.filter(device =>
                     (device.employeeId && device.employeeId.includes(searchTerm)) ||
@@ -2072,7 +2060,6 @@
                 );
             }
 
-            // تحديث إحصائيات الأجهزة
             const totalDevices = filteredDevices.length;
             const activeDevices = filteredDevices.filter(d => d.status === 'in-use').length;
             const scrappedDevices = filteredDevices.filter(d => d.status === 'scrapped').length;
@@ -2086,12 +2073,10 @@
                 row.setAttribute('data-device-id', device.id);
                 row.classList.add('animate-pop', 'table-row-highlight');
 
-                // إضافة فئة للأجهزة المخردة
                 if (device.status === 'scrapped') {
                     row.classList.add('scrapped-row');
                 }
 
-                // تحديد لون وحالة الجهاز
                 let statusClass, statusText;
                 switch (device.status) {
                     case 'in-use':
@@ -2137,8 +2122,7 @@
                 inventoryTableBody.appendChild(row);
             });
         }
-
-        // دالة مساعدة لتحويل نوع الجهاز إلى اسم عربي
+        
         function getDeviceTypeName(type) {
             const types = {
                 'laptop': 'لابتوب',
@@ -2152,13 +2136,11 @@
             return types[type] || type;
         }
 
-        // عرض نموذج تأكيد التخريد
         function showScrapModal(deviceId) {
             currentScrapDeviceId = deviceId;
             const device = devicesData.find(d => d.id === deviceId);
 
             if (device) {
-                // تعبئة معلومات العهدة بالترتيب الجديد
                 document.getElementById('scrap-device-type').textContent = getDeviceTypeName(device.type);
                 document.getElementById('scrap-device-model').textContent = device.model;
                 document.getElementById('scrap-device-serial').textContent = device.serial;
@@ -2166,7 +2148,6 @@
                 document.getElementById('scrap-device-specs').textContent = device.specs || '---';
                 document.getElementById('scrap-central').textContent = device.central || '---';
 
-                // تحويل الحالة إلى نص
                 let statusText;
                 switch (device.status) {
                     case 'in-use': statusText = 'مستخدم'; break;
@@ -2179,35 +2160,28 @@
             document.getElementById('scrapModal').classList.remove('hidden');
         }
 
-        // إخفاء نموذج التخريد
         function hideScrapModal() {
             document.getElementById('scrapModal').classList.add('hidden');
             document.getElementById('scrapForm').reset();
         }
 
-        // عرض نموذج نجاح التخريد
         function showScrapSuccessModal() {
             document.getElementById('scrapSuccessModal').classList.remove('hidden');
         }
-
-        // إخفاء نموذج نجاح التخريد
+        
         function hideScrapSuccessModal() {
             document.getElementById('scrapSuccessModal').classList.add('hidden');
         }
-
-        // عرض نموذج إضافة جهاز جديد
+        
         function showAddDeviceModal() {
             document.getElementById('addDeviceModal').classList.remove('hidden');
         }
-
-        // إخفاء نموذج إضافة جهاز جديد
+        
         function hideAddDeviceModal() {
             document.getElementById('addDeviceModal').classList.add('hidden');
             document.getElementById('addDeviceForm').reset();
         }
-
-        // ==== START: MODIFIED FUNCTION ====
-        // عرض نموذج تعديل جهاز
+        
         function showEditDeviceModal(deviceId) {
             currentEditDeviceId = deviceId;
             const device = devicesData.find(d => d.id === deviceId);
@@ -2215,7 +2189,6 @@
             if (device) {
                 document.getElementById('edit-device-id').value = device.id;
 
-                // تعبئة معلومات العهدة الثابتة
                 document.getElementById('edit-device-type-display').textContent = getDeviceTypeName(device.type);
                 document.getElementById('edit-device-model-display').textContent = device.model;
                 document.getElementById('edit-device-serial-display').textContent = device.serial;
@@ -2223,7 +2196,6 @@
                 document.getElementById('edit-device-specs-display').textContent = device.specs || '---';
                 document.getElementById('edit-device-central-display').textContent = device.central || '---';
                 
-                // تحويل الحالة إلى نص وعرضها
                 let statusText;
                 switch (device.status) {
                     case 'in-use': statusText = 'مستخدم'; break;
@@ -2232,12 +2204,10 @@
                 }
                 document.getElementById('edit-device-status-display').textContent = statusText;
 
-                // تعبئة حقول النموذج القابلة للتعديل
                 document.getElementById('edit-device-status').value = device.status;
                 document.getElementById('edit-device-employee-id').value = device.employeeId || '';
                 document.getElementById('edit-device-central').value = device.central || 'سنترال1';
 
-                // التعامل مع حقول المواصفات (الرام والهارد)
                 const specsFields = document.getElementById('edit-specs-fields');
                 const ramSelect = document.getElementById('edit-device-ram');
                 const hddSelect = document.getElementById('edit-device-hdd');
@@ -2247,7 +2217,6 @@
                     ramSelect.required = true;
                     hddSelect.required = true;
 
-                    // تحليل المواصفات الحالية وتعيينها
                     if (device.specs) {
                          const parts = device.specs.split('|').map(p => p.trim());
                          const ramPart = parts.find(p => p.startsWith('رام:'));
@@ -2272,20 +2241,13 @@
                 document.getElementById('editDeviceModal').classList.remove('hidden');
             }
         }
-        // ==== END: MODIFIED FUNCTION ====
-
-        // ==== START: MODIFIED FUNCTION ====
-        // إخفاء نموذج تعديل جهاز
+        
         function hideEditDeviceModal() {
             document.getElementById('editDeviceModal').classList.add('hidden');
-            document.getElementById('edit-specs-fields').classList.add('hidden'); // التأكد من إخفاء حقول المواصفات
+            document.getElementById('edit-specs-fields').classList.add('hidden'); 
             document.getElementById('editDeviceForm').reset();
         }
-        // ==== END: MODIFIED FUNCTION ====
-
-
-        // --- بداية الكود المعدل ---
-        // حذف الجهاز من المخزون مع تحديث التقارير
+        
         function scrapDevice(deviceId) {
             const device = devicesData.find(d => d.id === deviceId);
             if (device) {
@@ -2300,7 +2262,7 @@
                 initReportsCharts(reportData);
 
                 const newNotification = {
-                    id: Math.max(...adminNotifications.map(n => n.id)) + 1, // Generate a new unique ID
+                    id: Math.max(...adminNotifications.map(n => n.id)) + 1, 
                     title: 'تخريد جهاز',
                     content: `تم تخريد جهاز ${device.model} (${device.serial})`,
                     time: "الآن",
@@ -2321,10 +2283,7 @@
                 alert('Device not found');
             }
         }
-        // --- نهاية الكود المعدل ---
-
-
-        // تبديل بين أقسام لوحة التحكم
+        
         function switchAdminSection(target) {
             document.querySelectorAll('.admin-section').forEach(section => {
                 section.classList.add('hidden');
@@ -2352,18 +2311,15 @@
                 activeBtn.classList.remove('border-transparent');
             }
 
-            // إيقاف الكاميرا عند الخروج من قسم الباركود
             if (target !== 'barcode' && isCameraActive) {
                 stopCamera();
             }
-
-            // عند فتح قسم التقارير، تحديث المخططات
+            
             if (target === 'reports') {
                 initReportsPage();
             }
         }
 
-        // تشغيل الكاميرا
         async function startCamera() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({
@@ -2387,7 +2343,6 @@
             }
         }
 
-        // مسح الباركود
         function captureBarcode() {
             if (!isCameraActive) {
                 scannerMessage.textContent = 'الرجاء تشغيل الكاميرا أولاً';
@@ -2398,30 +2353,24 @@
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-            // محاكاة مسح الباركود
+            
             simulateBarcodeScan();
         }
 
-        // محاكاة مسح الباركود بشكل ذكي
         function simulateBarcodeScan() {
             const selectedCentral = document.getElementById('central-filter').value;
             let candidateDevices;
 
             if (selectedCentral && selectedCentral !== 'all') {
-                // فلترة الأجهزة حسب السنترال المحدد (مع استثناء الأجهزة المخردة)
                 candidateDevices = devicesData.filter(device =>
                     device.central === selectedCentral && device.status !== 'scrapped'
                 );
             } else {
-                // إذا لم يتم تحديد سنترال، استخدم كل الأجهزة غير المخردة
                 candidateDevices = devicesData.filter(device => device.status !== 'scrapped');
             }
-
-            // التحقق من وجود أجهزة متاحة للمسح في القائمة المفلترة
+            
             if (candidateDevices.length === 0) {
                 scannerMessage.textContent = 'لا توجد أجهزة متاحة للجرد في هذا السنترال.';
-                // مسح البيانات السابقة
                 document.getElementById('scanned-serial-number').textContent = '-';
                 document.getElementById('scanned-device-type').textContent = '-';
                 document.getElementById('scanned-model').textContent = '-';
@@ -2430,13 +2379,11 @@
                 document.getElementById('scanned-current-user').textContent = '-';
                 document.getElementById('scanned-central').textContent = '-';
                 document.getElementById('scanned-device-id').value = '';
-                return; // الخروج من الدالة
+                return; 
             }
-
-            // اختيار جهاز عشوائي من القائمة المرشحة
+            
             const device = candidateDevices[Math.floor(Math.random() * candidateDevices.length)];
 
-            // عرض بيانات الجهاز المختار
             document.getElementById('scanned-serial-number').textContent = device.serial;
             document.getElementById('scanned-device-type').textContent = getDeviceTypeName(device.type);
             document.getElementById('scanned-model').textContent = device.model;
@@ -2457,13 +2404,11 @@
             scannerMessage.textContent = 'تم مسح الباركود بنجاح';
         }
 
-        // دالة لتحديث حالة checkbox الجرد
         function updateInventoryCheckbox(deviceId, isChecked) {
             const device = devicesData.find(d => d.id === deviceId);
             if (device) {
                 device.inventoryDone = isChecked;
 
-                // تحديث الواجهة
                 const rows = document.querySelectorAll('#inventory-table-body tr');
                 rows.forEach(row => {
                     if (row.getAttribute('data-device-id') === deviceId) {
@@ -2471,7 +2416,6 @@
                         if (checkbox) {
                             checkbox.checked = isChecked;
 
-                            // إضافة تأثير مرئي
                             row.classList.toggle('inventory-checked', isChecked);
 
                             if (isChecked) {
@@ -2492,8 +2436,7 @@
                 });
             }
         }
-
-        // إيقاف الكاميرا
+        
         function stopCamera() {
             if (stream) {
                 stream.getTracks().forEach(track => track.stop());
@@ -2509,9 +2452,7 @@
                 scannerMessage.textContent = 'تم إيقاف الكاميرا. انقر على "تشغيل الكاميرا" لتفعيل الماسح الضوئي';
             }
         }
-
-        // --- بداية الكود المعدل ---
-        // تحديث شارة الإشعارات
+        
         function updateNotificationBadge() {
             const badge = document.getElementById('notification-badge');
             if (!badge) return;
@@ -2525,16 +2466,14 @@
                 badge.style.display = 'none';
             }
         }
-
-        // عرض الإشعارات
+        
         function showNotifications() {
             const container = document.getElementById('notifications-container');
             const list = document.getElementById('notifications-list');
 
             container.style.display = 'block';
             list.innerHTML = '';
-
-            // عرض الإشعارات مرتبة حسب الـ ID (الأحدث أولاً)
+            
             adminNotifications.sort((a, b) => b.id - a.id).forEach(notification => {
                 const item = document.createElement('div');
                 item.className = `notification-item ${notification.read ? '' : 'bg-blue-50'}`;
@@ -2554,8 +2493,7 @@
                 list.appendChild(item);
             });
         }
-        // --- نهاية الكود المعدل ---
-
+        
         function populateYearDropdowns() {
             const inventoryYearSelect = document.getElementById('inventoryYear');
             const scrapYearSelect = document.getElementById('scrapYear');
@@ -2575,21 +2513,12 @@
             }
         }
 
-
-        // =====================
-        // تهيئة الصفحة عند التحميل
-        // =====================
+        
         document.addEventListener('DOMContentLoaded', function () {
-            // عرض الأجهزة
             displayInventory();
-
-            // تحديث شارة الإشعارات
             updateNotificationBadge();
-
-            // تعبئة فلاتر السنوات
             populateYearDropdowns();
 
-            // معالجة النقر على أزرار الجرد
             document.addEventListener('click', function (e) {
                 if (e.target.closest('.scrap-btn')) {
                     const deviceId = e.target.closest('tr').getAttribute('data-device-id');
@@ -2606,13 +2535,11 @@
                     switchAdminSection(target);
                 }
 
-                // تحديث حالة الجرد عند النقر على checkbox
                 if (e.target.classList.contains('inventory-checkbox')) {
                     const deviceId = e.target.closest('tr').getAttribute('data-device-id');
                     const isChecked = e.target.checked;
                     updateInventoryCheckbox(deviceId, isChecked);
 
-                    // إظهار رسالة التأكيد
                     const message = document.getElementById('inventory-done-message');
                     message.style.display = 'block';
                     setTimeout(() => {
@@ -2621,7 +2548,6 @@
                 }
             });
 
-            // معالجة تأكيد التخريد
             document.getElementById('confirmScrap').addEventListener('click', function (e) {
                 e.preventDefault();
                 const receiptFile = document.getElementById('scrap-receipt').files[0];
@@ -2634,29 +2560,24 @@
                     scrapDevice(currentScrapDeviceId);
                 }
             });
-
-            // معالجة إلغاء التخريد
+            
             document.getElementById('cancelScrap').addEventListener('click', hideScrapModal);
             document.getElementById('closeScrapModal').addEventListener('click', hideScrapModal);
 
-            // معالجة إغلاق نافذة نجاح التخريد
             document.getElementById('closeScrapSuccess').addEventListener('click', hideScrapSuccessModal);
             document.getElementById('scrapSuccessModal').addEventListener('click', function (e) {
                 if (e.target === this) {
                     hideScrapSuccessModal();
                 }
             });
-
-            // معالجة إضافة جهاز جديد
+            
             document.getElementById('add-inventory-btn').addEventListener('click', showAddDeviceModal);
             document.getElementById('closeAddDeviceModal').addEventListener('click', hideAddDeviceModal);
             document.getElementById('cancelAddDevice').addEventListener('click', hideAddDeviceModal);
 
-            // زر مسح الرقم التسلسلي
             document.getElementById('scan-serial-btn').addEventListener('click', function () {
                 hideAddDeviceModal();
                 switchAdminSection('barcode');
-                // Optional: Automatically start the camera
                 setTimeout(() => {
                     startCamera();
                     scannerMessage.textContent = 'وجه الكاميرا نحو باركود الرقم التسلسلي';
@@ -2664,7 +2585,6 @@
             });
 
 
-            // إظهار/إخفاء حقول المواصفات حسب نوع الجهاز
             document.getElementById('new-device-type').addEventListener('change', function () {
                 const type = this.value;
                 const specsFields = document.getElementById('specs-fields');
@@ -2682,7 +2602,6 @@
                 }
             });
 
-            // معالجة حفظ الجهاز الجديد
             document.getElementById('addDeviceForm').addEventListener('submit', function (e) {
                 e.preventDefault();
 
@@ -2699,7 +2618,6 @@
                     return;
                 }
 
-                // توليد مواصفات الجهاز
                 let specs = '';
                 if (type === 'laptop' || type === 'desktop') {
                     const ram = document.getElementById('new-device-ram').value;
@@ -2717,7 +2635,7 @@
                     type: type,
                     model: model,
                     serial: serial,
-                    status: 'in-use', // **الحالة دائما "مستخدم"**
+                    status: 'in-use', 
                     employeeId: employeeId,
                     user: user,
                     central: central,
@@ -2731,13 +2649,10 @@
                 hideAddDeviceModal();
                 alert('تمت إضافة الجهاز بنجاح!');
             });
-
-            // معالجة تعديل الجهاز
+            
             document.getElementById('closeEditDeviceModal').addEventListener('click', hideEditDeviceModal);
             document.getElementById('cancelEditDevice').addEventListener('click', hideEditDeviceModal);
 
-            // ==== START: MODIFIED FUNCTION ====
-            // معالجة حفظ التعديلات
             document.getElementById('editDeviceForm').addEventListener('submit', function (e) {
                 e.preventDefault();
 
@@ -2748,12 +2663,10 @@
 
                 const deviceIndex = devicesData.findIndex(item => item.id === deviceId);
                 if (deviceIndex > -1) {
-                    // تحديث البيانات الأساسية
                     devicesData[deviceIndex].status = newStatus;
                     devicesData[deviceIndex].employeeId = newEmployeeId;
                     devicesData[deviceIndex].central = newCentral;
 
-                    // تحديث المواصفات إذا كان لابتوب أو ديسكتوب
                     const deviceType = devicesData[deviceIndex].type;
                     if (deviceType === 'laptop' || deviceType === 'desktop') {
                          const newRam = document.getElementById('edit-device-ram').value;
@@ -2762,7 +2675,7 @@
                             devicesData[deviceIndex].specs = `رام: ${newRam} | هارد: ${newHdd}`;
                          } else {
                             alert('الرجاء تحديد الرام والهارد.');
-                            return; // منع إغلاق النافذة إذا كانت الحقول مطلوبة وفارغة
+                            return; 
                          }
                     }
 
@@ -2774,38 +2687,26 @@
 
                 hideEditDeviceModal();
             });
-            // ==== END: MODIFIED FUNCTION ====
-
-
-            // معالجة تسجيل الخروج
+            
             document.getElementById('admin-logout-btn').addEventListener('click', function () {
-                // إيقاف الكاميرا قبل الخروج
                 stopCamera();
                 window.location.href = 'index.html';
             });
-
-            // معالجة اختيار ملف الإيصال
+            
             document.getElementById('receipt-upload').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
                 document.getElementById('receipt-file-name').value = fileName;
             });
-
-            // ================================================
-            // الأحداث للأزرار في قسم مسح الباركود
-            // ================================================
-
-            // زر "تم الجرد"
+            
             document.getElementById('inventory-done-btn').addEventListener('click', function () {
                 const deviceId = document.getElementById('scanned-device-id').value;
 
                 if (deviceId) {
-                    // تحديث حالة الجرد في الجدول
                     updateInventoryCheckbox(deviceId, true);
 
                     const message = document.getElementById('inventory-done-message');
                     message.style.display = 'block';
 
-                    // إخفاء الرسالة بعد 3 ثوان
                     setTimeout(() => {
                         message.style.display = 'none';
                     }, 3000);
@@ -2814,7 +2715,6 @@
                 }
             });
 
-            // زر "تعديل"
             document.getElementById('edit-scanned-device-btn').addEventListener('click', function () {
                 const deviceId = document.getElementById('scanned-device-id').value;
 
@@ -2825,7 +2725,6 @@
                 }
             });
 
-            // زر "تخريد"
             document.getElementById('delete-scanned-device-btn').addEventListener('click', () => {
                 const deviceId = document.getElementById('scanned-device-id').value;
                 if (deviceId) {
@@ -2834,46 +2733,38 @@
                     alert('لم يتم تحديد جهاز للتخريد. يرجى مسح باركود أولاً.');
                 }
             });
-
-
-            // معالجة أزرار الكاميرا
+            
             startBtn.addEventListener('click', startCamera);
             captureBtn.addEventListener('click', captureBarcode);
             stopBtn.addEventListener('click', stopCamera);
 
-            // أحداث التقارير
             document.getElementById('applyFilters').addEventListener('click', applyReportFilters);
             document.getElementById('resetFilters').addEventListener('click', resetReportFilters);
             document.getElementById('exportReport').addEventListener('click', exportReport);
             document.getElementById('searchInput').addEventListener('keyup', searchReportTable);
 
-            // إظهار/إخفاء فلاتر المواصفات في قسم العهد
             document.getElementById('deviceType').addEventListener('change', function () {
                 const specsFilters = document.getElementById('inventory-specs-filters');
                 if (this.value === 'laptop' || this.value === 'desktop') {
                     specsFilters.classList.remove('hidden');
                 } else {
                     specsFilters.classList.add('hidden');
-                    // Reset and apply filters when hiding
                     document.getElementById('inventory-ram-filter').value = 'all';
                     document.getElementById('inventory-hdd-filter').value = 'all';
                 }
             });
 
-            // إظهار/إخفاء فلاتر المواصفات في قسم المخردات
             document.getElementById('scrapDeviceType').addEventListener('change', function () {
                 const specsFilters = document.getElementById('scrap-specs-filters');
                 if (this.value === 'laptop' || this.value === 'desktop') {
                     specsFilters.classList.remove('hidden');
                 } else {
                     specsFilters.classList.add('hidden');
-                    // Reset and apply filters when hiding
                     document.getElementById('scrap-ram-filter').value = 'all';
                     document.getElementById('scrap-hdd-filter').value = 'all';
                 }
             });
-
-            // أحداث Radio Buttons
+            
             document.querySelectorAll('input[name="searchType"]').forEach(radio => {
                 radio.addEventListener('change', function () {
                     toggleSearchSections();
@@ -2881,19 +2772,15 @@
                 });
             });
 
-            // أحداث التصفية في قسم العهد
             document.getElementById('central-filter').addEventListener('change', displayInventory);
             document.getElementById('inventory-search').addEventListener('input', displayInventory);
 
-            // تهيئة قسم التقارير
             initReportsPage();
-
-            // أحداث الجرس والإشعارات
+            
             document.getElementById('notification-btn').addEventListener('click', function () {
                 showNotifications();
             });
-
-            // إغلاق الإشعارات عند النقر خارجها
+            
             document.addEventListener('click', function (e) {
                 const notifications = document.getElementById('notifications-container');
                 const bell = document.getElementById('notification-btn');
