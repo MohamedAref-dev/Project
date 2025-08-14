@@ -219,6 +219,13 @@
             text-align: left;
             margin-top: 3px;
         }
+        
+        /* New Style for Device Specs */
+        .device-specs {
+            font-size: 12px;
+            line-height: 1.4;
+            color: #4b5563;
+        }
     </style>
 </head>
 
@@ -233,7 +240,7 @@
                         <div class="relative">
                             <button id="notification-btn"
                                 class="notification-btn text-white p-1 rounded-full hover:bg-primary-600 transition">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
+                                <svg xmlns="http://www.w.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24"
                                     stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -269,6 +276,8 @@
                                 <tr class="bg-gray-100">
                                     <th class="py-2 px-3 sm:px-4 border-b text-right">رقم العهدة</th>
                                     <th class="py-2 px-3 sm:px-4 border-b text-right">نوع الجهاز</th>
+                                    <th class="py-2 px-3 sm:px-4 border-b text-right">الموديل</th>
+                                    <th class="py-2 px-3 sm:px-4 border-b text-right">معلومات الجهاز</th>
                                     <th class="py-2 px-3 sm:px-4 border-b text-right">الرقم التسلسلي</th>
                                     <th class="py-2 px-3 sm:px-4 border-b text-right">تاريخ الاستلام</th>
                                     <th class="py-2 px-3 sm:px-4 border-b text-right">الحالة</th>
@@ -278,6 +287,8 @@
                                 <tr class="fade-in">
                                     <td class="py-2 px-3 sm:px-4 border-b">001</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">لابتوب</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">HP ProBook 450 G8</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b device-specs">رام: DDR4-8G | هارد: HDD1T</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">LT78945612</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">01/01/2023</td>
                                     <td class="py-2 px-3 sm:px-4 border-b"><span
@@ -287,6 +298,8 @@
                                 <tr class="fade-in">
                                     <td class="py-2 px-3 sm:px-4 border-b">002</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">جهاز كمبيوتر</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">HP EliteDesk 800 G5</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b device-specs">رام: DDR4-16G | هارد: HDD500G+SSD240G</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">PC45678923</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">15/03/2023</td>
                                     <td class="py-2 px-3 sm:px-4 border-b"><span
@@ -296,6 +309,8 @@
                                 <tr class="fade-in">
                                     <td class="py-2 px-3 sm:px-4 border-b">003</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">طابعة</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">Brother HL-L2350DW</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b device-specs">-</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">PR12345678</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">10/05/2023</td>
                                     <td class="py-2 px-3 sm:px-4 border-b"><span
@@ -305,6 +320,8 @@
                                 <tr class="fade-in">
                                     <td class="py-2 px-3 sm:px-4 border-b">004</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">شاشة</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">LG UltraFine 5K</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b device-specs">-</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">SC98765432</td>
                                     <td class="py-2 px-3 sm:px-4 border-b">20/06/2023</td>
                                     <td class="py-2 px-3 sm:px-4 border-b"><span
