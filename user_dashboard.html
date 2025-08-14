@@ -302,17 +302,36 @@
                                             class="px-2 py-1 bg-red-100 text-red-800 rounded-full text-xs">تحت
                                             الصيانة</span></td>
                                 </tr>
-                            </tbody>
+                                <tr class="fade-in">
+                                    <td class="py-2 px-3 sm:px-4 border-b">004</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">شاشة</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">SC98765432</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b">20/06/2023</td>
+                                    <td class="py-2 px-3 sm:px-4 border-b"><span
+                                            class="px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">سليم</span>
+                                    </td>
+                                </tr>
+                                </tbody>
                         </table>
                     </div>
                 </div>
 
                 <div class="bg-white rounded-lg shadow-md p-4 sm:p-6">
-                    <h2 class="text-lg sm:text-xl font-bold text-primary-700 mb-3 sm:mb-4"> تعديل عهدة </h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-primary-700 mb-3 sm:mb-4">إجراء على عهدة</h2>
+
+                    <div class="flex items-center space-x-6 space-x-reverse mb-4 pb-4 border-b border-gray-200">
+                        <div class="flex items-center">
+                            <input type="radio" id="modify-request" name="request-type" value="modify" class="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out" checked>
+                            <label for="modify-request" class="mr-2 text-sm font-medium text-gray-800 cursor-pointer">طلب تعديل العهدة</label>
+                        </div>
+                        <div class="flex items-center">
+                            <input type="radio" id="scrap-request" name="request-type" value="scrap" class="form-radio h-4 w-4 text-primary-600 transition duration-150 ease-in-out">
+                            <label for="scrap-request" class="mr-2 text-sm font-medium text-gray-800 cursor-pointer">طلب تخريد عهدة</label>
+                        </div>
+                    </div>
                     <form id="issue-report-form" class="space-y-4">
                         <div class="mb-3 sm:mb-4">
-                            <label for="issue-device" class="block text-sm font-medium text-gray-700 mb-1">اختر
-                                الجهاز</label>
+                            <label for="issue-device" class="block text-sm font-medium text-gray-700 mb-1">اختر الجهاز</label>
                             <select id="issue-device"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
                                 required>
@@ -320,12 +339,12 @@
                                 <option value="1">لابتوب - LT78945612</option>
                                 <option value="2">جهاز كمبيوتر - PC45678923</option>
                                 <option value="3">طابعة - PR12345678</option>
-                            </select>
+                                <option value="4">شاشة - SC98765432</option>
+                                </select>
                         </div>
 
                         <div class="mb-3 sm:mb-4">
-                            <label for="receipt-upload" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال
-                                الاستلام او إيصال التخريد</label>
+                            <label for="receipt-upload" id="receipt-label" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التسليم</label>
                             <div class="flex items-center">
                                 <input type="file" id="receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
                                 <input type="text" id="receipt-file-name"
@@ -339,17 +358,16 @@
                             <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
                         </div>
                         <div class="mb-3 sm:mb-4">
-                            <label for="issue-notes"
-                                class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
+                            <label for="issue-notes" class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
                             <textarea id="issue-notes" rows="3"
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                                placeholder="أدخل ملاحظاتك هنا" required></textarea>
+                                placeholder="أدخل ملاحظاتك هنا (اختياري)"></textarea>
                         </div>
 
                         <div class="relative">
                             <button type="submit" id="submit-issue"
                                 class="w-full bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 text-sm">
-                                <span id="submit-text">إرسال</span>
+                                <span id="submit-text">إرسال طلب التعديل</span>
                                 <span id="submit-loading" class="hidden items-center justify-center">
                                     <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
                                         xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -389,7 +407,7 @@
                 </svg>
             </div>
             <h3 class="popup-title">تم بنجاح!</h3>
-            <p class="popup-message">تم إرسال البلاغ بنجاح</p>
+            <p class="popup-message">تم إرسال الطلب بنجاح</p>
             <button id="popup-close-btn" class="popup-close-btn">حسناً</button>
         </div>
     </div>
@@ -410,7 +428,6 @@
             if (unreadCount > 0) {
                 badge.textContent = unreadCount;
                 badge.style.display = 'flex';
-                // إضافة تأثير الاهتزاز للشارة
                 badge.classList.add('animate-pulse');
                 setTimeout(() => {
                     badge.classList.remove('animate-pulse');
@@ -438,7 +455,6 @@
                 `;
 
                 item.addEventListener('click', () => {
-                    // عند النقر على الإشعار، نجعله مقروءًا ونخفي النافذة
                     notification.read = true;
                     updateNotificationBadge();
                     container.style.display = 'none';
@@ -459,61 +475,83 @@
                 notifications.style.display = 'none';
             }
         });
-
+        
         // عرض أسماء الملفات المختارة
         document.getElementById('receipt-upload').addEventListener('change', function (e) {
             const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
             document.getElementById('receipt-file-name').value = fileName;
         });
 
-        // معالجة إرسال النموذج مع Popup
+        // --- START: NEW SCRIPT FOR RADIO BUTTONS ---
+        const modifyRadio = document.getElementById('modify-request');
+        const scrapRadio = document.getElementById('scrap-request');
+        const receiptLabel = document.getElementById('receipt-label');
+        const submitText = document.getElementById('submit-text');
+
+        function updateFormUI() {
+            if (modifyRadio.checked) {
+                receiptLabel.textContent = 'إرفاق إيصال التسليم';
+                submitText.textContent = 'إرسال طلب التعديل';
+            } else {
+                receiptLabel.textContent = 'إرفاق إيصال التخريد';
+                submitText.textContent = 'إرسال طلب التخريد';
+            }
+        }
+
+        modifyRadio.addEventListener('change', updateFormUI);
+        scrapRadio.addEventListener('change', updateFormUI);
+        // --- END: NEW SCRIPT FOR RADIO BUTTONS ---
+
+
         // معالجة إرسال النموذج مع Popup
         document.getElementById('issue-report-form').addEventListener('submit', function (e) {
             e.preventDefault();
 
             const submitBtn = document.getElementById('submit-issue');
-            const submitText = document.getElementById('submit-text');
             const submitLoading = document.getElementById('submit-loading');
             const popupOverlay = document.getElementById('popup-overlay');
 
-            // -- الخطوة 1: الحصول على اسم الجهاز قبل أي شيء آخر --
             const deviceSelect = document.getElementById('issue-device');
             const selectedDeviceName = deviceSelect.options[deviceSelect.selectedIndex].text;
             const selectedDeviceValue = deviceSelect.value;
+            
+            // تحديد نوع الطلب من الـ radio button
+            const requestType = document.querySelector('input[name="request-type"]:checked').value;
+            const requestTypeText = requestType === 'modify' ? 'التعديل' : 'التخريد';
 
             // عرض حالة التحميل
-            submitText.classList.add('hidden');
+            document.getElementById('submit-text').classList.add('hidden');
             submitLoading.classList.remove('hidden');
             submitBtn.disabled = true;
 
             // محاكاة إرسال البيانات إلى الخادم
             setTimeout(() => {
 
-                // -- الخطوة 2: إنشاء الإشعار وتحديث الواجهة فورًا --
-                // التأكد من أن المستخدم اختار جهازاً
+                // إنشاء إشعار جديد
                 if (selectedDeviceValue) {
                     const newNotification = {
                         id: userNotifications.length + 1,
-                        title: "تأكيد إرسال",
-                        content: `تم إرسال طلب التعديل لجهاز: ${selectedDeviceName}`,
+                        title: `تأكيد إرسال طلب ${requestTypeText}`,
+                        content: `تم إرسال طلب ${requestTypeText} لجهاز: ${selectedDeviceName}`,
                         time: "الآن",
                         read: false
                     };
                     userNotifications.unshift(newNotification);
-                    updateNotificationBadge(); // تحديث أيقونة الجرس مباشرة
+                    updateNotificationBadge();
                 }
 
-                // -- الخطوة 3: إظهار رسالة النجاح وإعداد زر الإغلاق --
+                // إظهار رسالة النجاح المنبثقة
                 submitLoading.classList.add('hidden');
+                document.querySelector('.popup-message').textContent = `تم إرسال طلب ${requestTypeText} بنجاح.`;
                 popupOverlay.classList.add('active');
 
-                // زر الإغلاق الآن وظيفته فقط إغلاق النافذة وإعادة تعيين النموذج
                 document.getElementById('popup-close-btn').addEventListener('click', function () {
                     popupOverlay.classList.remove('active');
-                    submitText.classList.remove('hidden');
+                    document.getElementById('submit-text').classList.remove('hidden');
                     submitBtn.disabled = false;
-                    e.target.reset();
-                    document.getElementById('receipt-file-name').value = '';
+                    e.target.reset(); // إعادة تعيين الحقول
+                    document.getElementById('receipt-file-name').value = ''; // مسح اسم الملف
+                    updateFormUI(); // إعادة تعيين واجهة المستخدم للنموذج إلى الحالة الافتراضية
                 }, { once: true });
 
             }, 2000);
@@ -522,8 +560,6 @@
         // وظيفة الجرس (للنقر)
         document.getElementById('notification-btn').addEventListener('click', function () {
             showNotifications();
-
-            // إخفاء الفقاعة بعد النقر
             const badge = this.querySelector('.notification-badge');
             if (badge) {
                 badge.style.display = 'none';
@@ -532,12 +568,12 @@
 
         // حل مشكلة زر تسجيل الخروج
         document.getElementById('logout-btn').addEventListener('click', function () {
-            // توجيه المستخدم إلى صفحة تسجيل الدخول
             window.location.href = 'index.html';
         });
 
-        // تهيئة البادج عند التحميل
+        // تهيئة الواجهة عند التحميل
         updateNotificationBadge();
+        updateFormUI(); // للتأكد من أن الواجهة صحيحة عند تحميل الصفحة
     </script>
 </body>
 

@@ -729,22 +729,6 @@
                                             البحث في المخردات
                                         </label>
                                     </div>
-                                    <div class="flex items-center">
-                                        <input type="radio" id="request-modify" name="searchType" value="modify"
-                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500">
-                                        <label for="request-modify"
-                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
-                                            طلب تعديل عهدة
-                                        </label>
-                                    </div>
-                                    <div class="flex items-center">
-                                        <input type="radio" id="request-scrap" name="searchType" value="request_scrap"
-                                            class="h-4 w-4 text-primary-600 focus:ring-primary-500">
-                                        <label for="request-scrap"
-                                            class="ml-2 block text-sm text-gray-700 cursor-pointer">
-                                            طلب تخريد عهدة
-                                        </label>
-                                    </div>
                                 </div>
                             </div>
 
@@ -886,86 +870,6 @@
                                         </select>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <div id="modify-request-section" class="mb-6 hidden">
-                                <h3 class="text-md font-medium text-yellow-700 mb-3 border-b border-yellow-200 pb-2">✏️ طلب تعديل عهدة</h3>
-                                <form id="modify-request-form" class="space-y-4">
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="modify-request-device" class="block text-sm font-medium text-gray-700 mb-1">اختر
-                                            الجهاز</label>
-                                        <select id="modify-request-device"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                                            required>
-                                            <option value="">-- اختر الجهاز --</option>
-                                        </select>
-                                    </div>
-            
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="modify-request-receipt-upload" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التسليم</label>
-                                        <div class="flex items-center">
-                                            <input type="file" id="modify-request-receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
-                                            <input type="text" id="modify-request-receipt-file-name"
-                                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
-                                                placeholder="لم يتم اختيار ملف" readonly>
-                                            <button type="button" onclick="document.getElementById('modify-request-receipt-upload').click()"
-                                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
-                                                اختر ملف
-                                            </button>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">يرجى إرفاق إيصال التسليم</p>
-                                    </div>
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="modify-request-notes"
-                                            class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-                                        <textarea id="modify-request-notes" rows="3"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                                            placeholder="أدخل ملاحظاتك هنا" required></textarea>
-                                    </div>
-                                    <div class="mt-4">
-                                        <button type="submit" class="btn-primary w-full">إرسال طلب التعديل</button>
-                                    </div>
-                                </form>
-                            </div>
-
-                            <div id="scrap-request-section" class="mb-6 hidden">
-                                <h3 class="text-md font-medium text-red-700 mb-3 border-b border-red-200 pb-2">🗑️ طلب تخريد عهدة</h3>
-                                <form id="scrap-request-form" class="space-y-4">
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="scrap-request-device" class="block text-sm font-medium text-gray-700 mb-1">اختر
-                                            الجهاز</label>
-                                        <select id="scrap-request-device"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                                            required>
-                                            <option value="">-- اختر الجهاز --</option>
-                                        </select>
-                                    </div>
-            
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="scrap-request-receipt-upload" class="block text-sm font-medium text-gray-700 mb-1">إرفاق إيصال التخريد</label>
-                                        <div class="flex items-center">
-                                            <input type="file" id="scrap-request-receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
-                                            <input type="text" id="scrap-request-receipt-file-name"
-                                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
-                                                placeholder="لم يتم اختيار ملف" readonly>
-                                            <button type="button" onclick="document.getElementById('scrap-request-receipt-upload').click()"
-                                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
-                                                اختر ملف
-                                            </button>
-                                        </div>
-                                        <p class="text-xs text-gray-500 mt-1">يرجى إرفاق إيصال التخريد</p>
-                                    </div>
-                                    <div class="mb-3 sm:mb-4">
-                                        <label for="scrap-request-notes"
-                                            class="block text-sm font-medium text-gray-700 mb-1">ملاحظات</label>
-                                        <textarea id="scrap-request-notes" rows="3"
-                                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-sm"
-                                            placeholder="أدخل ملاحظاتك هنا" required></textarea>
-                                    </div>
-                                     <div class="mt-4">
-                                        <button type="submit" class="btn-danger w-full">إرسال طلب التخريد</button>
-                                    </div>
-                                </form>
                             </div>
 
                             <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
@@ -1322,10 +1226,9 @@
             </div>
         </div>
 
-
         <div id="editDeviceModal"
             class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 sm:p-6 z-50 hidden">
-            <div class="bg-white rounded-lg shadow-xl w-full max-w-sm sm:max-w-md p-6 relative">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-lg p-6 relative">
                 <button id="closeEditDeviceModal"
                     class="absolute top-3 left-3 text-gray-500 hover:text-gray-700 text-2xl font-bold">
                     &times;
@@ -1334,93 +1237,115 @@
                     <h3 class="text-xl font-bold text-primary-700">تعديل العهدة</h3>
                 </div>
 
-                <form id="editDeviceForm" class="space-y-4 text-sm">
-                    <input type="hidden" id="edit-device-id">
+                <form id="editDeviceForm" class="space-y-3">
+                     <div class="modal-content pr-2">
+                        <input type="hidden" id="edit-device-id">
 
-                    <div class="bg-gray-50 p-3 rounded-md border border-gray-200">
-                        <p class="font-medium text-gray-700 mb-1">معلومات العهدة</p>
-                        <p><span class="text-gray-600">النوع:</span> <span id="edit-device-type-display"></span></p>
+                        <div class="bg-gray-50 p-3 rounded-md border border-gray-200 text-sm text-right">
+                            <p class="font-medium text-gray-700 mb-1">معلومات العهدة</p>
+                            <p><span class="text-gray-600">النوع:</span> <span id="edit-device-type-display"></span></p>
+                            <p><span class="text-gray-600">الموديل:</span> <span id="edit-device-model-display"></span></p>
+                            <p><span class="text-gray-600">الرقم التسلسلي:</span> <span id="edit-device-serial-display"></span></p>
+                            <p><span class="text-gray-600">اسم المستخدم:</span> <span id="edit-device-user-display"></span></p>
+                            <p><span class="text-gray-600">الحالة:</span> <span id="edit-device-status-display"></span></p>
+                            <p><span class="text-gray-600">المواصفات:</span> <span id="edit-device-specs-display"></span></p>
+                            <p><span class="text-gray-600">السنترال:</span> <span id="edit-device-central-display"></span></p>
+                        </div>
+                        <div id="edit-specs-fields" class="hidden space-y-3 pt-2">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="edit-device-ram"
+                                        class="block text-gray-700 font-medium mb-1 text-sm">الرام *</label>
+                                    <select id="edit-device-ram"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                        required>
+                                        <option value="">-- اختر حجم الرام --</option>
+                                        <option value="DDR3-4G">DDR3-4G</option>
+                                        <option value="DDR4-4G">DDR4-4G</option>
+                                        <option value="DDR4-8G">DDR4-8G</option>
+                                        <option value="DDR4-16G">DDR4-16G</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="edit-device-hdd"
+                                        class="block text-gray-700 font-medium mb-1 text-sm">الهارد *</label>
+                                    <select id="edit-device-hdd"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                        required>
+                                        <option value="">-- اختر نوع الهارد --</option>
+                                        <option value="HDD500G">HDD500G</option>
+                                        <option value="HDD1T">HDD1T</option>
+                                        <option value="HDD500G+SSD240G">HDD500G+SSD240G</option>
+                                        <option value="HDD500G+SSD500G">HDD500G+SSD500G</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <label for="edit-device-employee-id" class="block text-gray-700 font-medium mb-1 text-sm">المستخدم
+                                الجديد (رقم العامل) *</label>
+                            <input type="text" id="edit-device-employee-id"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                placeholder="أدخل رقم العامل للمستخدم الجديد" required>
+                        </div>
 
-                        <p><span class="text-gray-600">الموديل:</span> <span id="edit-device-model-display"></span></p>
+                        <div>
+                            <label for="edit-device-status" class="block text-gray-700 font-medium mb-1 text-sm">الحالة
+                                *</label>
+                            <select id="edit-device-status"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                required>
+                                <option value="in-use">مستخدم</option>
+                                <option value="maintenance">تحت الصيانة</option>
+                            </select>
+                        </div>
 
-                        <p><span class="text-gray-600">الرقم التسلسلي:</span> <span
-                                id="edit-device-serial-display"></span></p>
+                        <div>
+                            <label for="edit-device-central" class="block text-gray-700 font-medium mb-1 text-sm">السنترال *</label>
+                            <select id="edit-device-central"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 text-sm"
+                                required>
+                                <option value="سنترال1">سنترال1</option>
+                                <option value="سنترال2">سنترال2</option>
+                                <option value="سنترال3">سنترال3</option>
+                                <option value="سنترال4">سنترال4</option>
+                                <option value="سنترال5">سنترال5</option>
+                                <option value="سنترال6">سنترال6</option>
+                                <option value="سنترال7">سنترال7</option>
+                            </select>
+                        </div>
 
-                        <p><span class="text-gray-600">اسم المستخدم:</span> <span id="edit-device-user-display"></span>
-                        </p>
+                        <div>
+                            <label for="receipt-upload" class="block text-gray-700 font-medium mb-1 text-sm">إرفاق إيصال
+                                الاستلام</label>
+                            <div class="flex items-center">
+                                <input type="file" id="receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
+                                <input type="text" id="receipt-file-name"
+                                    class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
+                                    placeholder="لم يتم اختيار ملف" readonly>
+                                <button type="button" onclick="document.getElementById('receipt-upload').click()"
+                                    class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
+                                    اختر ملف
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
+                        </div>
 
-                        <p><span class="text-gray-600">الحالة:</span> <span id="edit-device-status-display"></span></p>
-
-                        <p><span class="text-gray-600">المواصفات:</span> <span id="edit-device-specs-display"></span>
-                        </p>
-
-                        <p><span class="text-gray-600">السنترال:</span> <span id="edit-device-central-display"></span>
-                        </p>
-                    </div>
-
-                    <div>
-                        <label for="edit-device-employee-id" class="block text-gray-700 font-medium mb-1">المستخدم
-                            الجديد (رقم العامل) *</label>
-                        <input type="text" id="edit-device-employee-id"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            placeholder="أدخل رقم العامل للمستخدم الجديد" required>
-                    </div>
-
-                    <div>
-                        <label for="edit-device-status" class="block text-gray-700 font-medium mb-1">الحالة
-                            *</label>
-                        <select id="edit-device-status"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            required>
-                            <option value="in-use">مستخدم</option>
-                            <option value="maintenance">تحت الصيانة</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="edit-device-central" class="block text-gray-700 font-medium mb-1">السنترال *</label>
-                        <select id="edit-device-central"
-                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                            required>
-                            <option value="سنترال1">سنترال1</option>
-                            <option value="سنترال2">سنترال2</option>
-                            <option value="سنترال3">سنترال3</option>
-                            <option value="سنترال4">سنترال4</option>
-                            <option value="سنترال5">سنترال5</option>
-                            <option value="سنترال6">سنترال6</option>
-                            <option value="سنترال7">سنترال7</option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label for="receipt-upload" class="block text-gray-700 font-medium mb-1">إرفاق إيصال
-                            الاستلام</label>
-                        <div class="flex items-center">
-                            <input type="file" id="receipt-upload" class="hidden" accept=".pdf,.jpg,.jpeg,.png">
-                            <input type="text" id="receipt-file-name"
-                                class="flex-grow px-3 py-2 border border-gray-300 rounded-r-md text-sm"
-                                placeholder="لم يتم اختيار ملف" readonly>
-                            <button type="button" onclick="document.getElementById('receipt-upload').click()"
-                                class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-2 rounded-l-md border border-gray-300 text-sm">
-                                اختر ملف
+                        <div class="flex justify-between mt-6 space-x-4 space-x-reverse">
+                            <button type="button" id="cancelEditDevice"
+                                class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
+                                إلغاء
+                            </button>
+                            <button type="submit" id="saveEditedDevice"
+                                class="w-1/2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                                حفظ التغييرات
                             </button>
                         </div>
-                        <p class="text-xs text-gray-500 mt-1">يجب أن يكون الملف من نوع PDF, JPG, أو PNG</p>
-                    </div>
-
-                    <div class="flex justify-between mt-6 space-x-4 space-x-reverse">
-                        <button type="button" id="cancelEditDevice"
-                            class="w-1/2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2">
-                            إلغاء
-                        </button>
-                        <button type="submit" id="saveEditedDevice"
-                            class="w-1/2 bg-primary-600 hover:bg-primary-700 text-white font-bold py-2 px-4 rounded-md transition duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
-                            حفظ التغييرات
-                        </button>
                     </div>
                 </form>
             </div>
         </div>
+
     </div>
 
     <script>
@@ -1559,7 +1484,57 @@
             { "id": "097", "employeeId": "1097", "type": "desktop", "model": "HP ProDesk 400 G7", "serial": "DE00000097", "status": "in-use", "user": "وسام نادر", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": generateRandomSpecs() },
             { "id": "098", "employeeId": "1098", "type": "monitor", "model": "Dell S2721QS", "serial": "MO00000098", "status": "in-use", "user": "نادر عمرو", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
             { "id": "099", "employeeId": "1099", "type": "printer", "model": "Brother DCP-L2550DW", "serial": "PR00000099", "status": "in-use", "user": "عمرو سامح", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
-            { "id": "100", "employeeId": "1100", "type": "tablet", "model": "HONOR Pad 8", "serial": "TA00000100", "status": "in-use", "user": "سامح رفعت", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" }
+            { "id": "100", "employeeId": "1100", "type": "tablet", "model": "HONOR Pad 8", "serial": "TA00000100", "status": "in-use", "user": "سامح رفعت", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "101", "employeeId": "1101", "type": "tablet", "model": "Lenovo Tab P12 Pro", "serial": "TA00000101", "status": "in-use", "user": "طارق الشهري", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "102", "employeeId": "1102", "type": "tablet", "model": "Nokia T20", "serial": "TA00000102", "status": "in-use", "user": "حسن العتيبي", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "103", "employeeId": "1103", "type": "tablet", "model": "Amazon Fire HD 10 Plus", "serial": "TA00000103", "status": "in-use", "user": "فهد الزهراني", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "104", "employeeId": "1104", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000104", "status": "maintenance", "user": "سالم القحطاني", "central": "سنترال7", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "105", "employeeId": "1105", "type": "tablet", "model": "Xiaomi Pad 5 Pro", "serial": "TA00000105", "status": "maintenance", "user": "حسن المطيري", "central": "سنترال6", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "106", "employeeId": "1106", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000106", "status": "in-use", "user": "سالم الشهري", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "107", "employeeId": "1107", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000107", "status": "in-use", "user": "حسن العنزي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "108", "employeeId": "1108", "type": "tablet", "model": "Huawei MatePad 11", "serial": "TA00000108", "status": "maintenance", "user": "ناصر المطيري", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "109", "employeeId": "1109", "type": "tablet", "model": "Samsung Galaxy Tab S8", "serial": "TA00000109", "status": "maintenance", "user": "ناصر الشهري", "central": "سنترال2", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "110", "employeeId": "1110", "type": "tablet", "model": "Lenovo Tab P12 Pro", "serial": "TA00000110", "status": "in-use", "user": "جابر الحربي", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "111", "employeeId": "1111", "type": "tablet", "model": "Nokia T20", "serial": "TA00000111", "status": "in-use", "user": "علي الحربي", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "112", "employeeId": "1112", "type": "tablet", "model": "Samsung Galaxy Tab S8", "serial": "TA00000112", "status": "maintenance", "user": "يوسف العتيبي", "central": "سنترال4", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "113", "employeeId": "1113", "type": "tablet", "model": "Apple iPad 9th Gen", "serial": "TA00000113", "status": "maintenance", "user": "خالد الشهري", "central": "سنترال6", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "114", "employeeId": "1114", "type": "tablet", "model": "Samsung Galaxy Tab S8", "serial": "TA00000114", "status": "in-use", "user": "علي الحربي", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "115", "employeeId": "1115", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000115", "status": "maintenance", "user": "جابر القحطاني", "central": "سنترال7", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "116", "employeeId": "1116", "type": "tablet", "model": "Amazon Fire HD 10 Plus", "serial": "TA00000116", "status": "maintenance", "user": "يوسف الشهري", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "117", "employeeId": "1117", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000117", "status": "in-use", "user": "سعيد الشهري", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "118", "employeeId": "1118", "type": "tablet", "model": "Apple iPad 9th Gen", "serial": "TA00000118", "status": "maintenance", "user": "علي الزهراني", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "119", "employeeId": "1119", "type": "tablet", "model": "Apple iPad 9th Gen", "serial": "TA00000119", "status": "maintenance", "user": "سعيد الحربي", "central": "سنترال2", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "120", "employeeId": "1120", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000120", "status": "in-use", "user": "فهد العنزي", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "121", "employeeId": "1121", "type": "tablet", "model": "Nokia T20", "serial": "TA00000121", "status": "maintenance", "user": "خالد المالكي", "central": "سنترال3", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "122", "employeeId": "1122", "type": "tablet", "model": "Nokia T20", "serial": "TA00000122", "status": "in-use", "user": "حسن الزهراني", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "123", "employeeId": "1123", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000123", "status": "maintenance", "user": "فهد المطيري", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "124", "employeeId": "1124", "type": "tablet", "model": "Nokia T20", "serial": "TA00000124", "status": "in-use", "user": "يوسف الشمري", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "125", "employeeId": "1125", "type": "tablet", "model": "Xiaomi Pad 5 Pro", "serial": "TA00000125", "status": "in-use", "user": "يوسف الحربي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "126", "employeeId": "1126", "type": "tablet", "model": "Nokia T20", "serial": "TA00000126", "status": "in-use", "user": "جابر المطيري", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "127", "employeeId": "1127", "type": "tablet", "model": "Huawei MatePad 11", "serial": "TA00000127", "status": "in-use", "user": "طارق المطيري", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "128", "employeeId": "1128", "type": "tablet", "model": "Oppo Pad", "serial": "TA00000128", "status": "maintenance", "user": "فهد المطيري", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "129", "employeeId": "1129", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000129", "status": "in-use", "user": "علي الشهري", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "130", "employeeId": "1130", "type": "tablet", "model": "Amazon Fire HD 10 Plus", "serial": "TA00000130", "status": "maintenance", "user": "سعيد المطيري", "central": "سنترال3", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "131", "employeeId": "1131", "type": "tablet", "model": "Xiaomi Pad 5 Pro", "serial": "TA00000131", "status": "maintenance", "user": "خالد الحربي", "central": "سنترال7", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "132", "employeeId": "1132", "type": "tablet", "model": "Lenovo Tab P12 Pro", "serial": "TA00000132", "status": "maintenance", "user": "سالم العتيبي", "central": "سنترال4", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "133", "employeeId": "1133", "type": "tablet", "model": "Xiaomi Pad 5 Pro", "serial": "TA00000133", "status": "in-use", "user": "حسن العتيبي", "central": "سنترال1", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "134", "employeeId": "1134", "type": "tablet", "model": "Apple iPad 9th Gen", "serial": "TA00000134", "status": "in-use", "user": "سالم الغامدي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "135", "employeeId": "1135", "type": "tablet", "model": "Huawei MatePad 11", "serial": "TA00000135", "status": "in-use", "user": "ناصر الزهراني", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "136", "employeeId": "1136", "type": "tablet", "model": "Huawei MatePad 11", "serial": "TA00000136", "status": "maintenance", "user": "خالد الزهراني", "central": "سنترال6", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "137", "employeeId": "1137", "type": "tablet", "model": "Apple iPad 9th Gen", "serial": "TA00000137", "status": "in-use", "user": "طارق الغامدي", "central": "سنترال7", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "138", "employeeId": "1138", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000138", "status": "maintenance", "user": "فهد القحطاني", "central": "سنترال7", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "139", "employeeId": "1139", "type": "tablet", "model": "Samsung Galaxy Tab S8", "serial": "TA00000139", "status": "maintenance", "user": "جابر الغامدي", "central": "سنترال5", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "140", "employeeId": "1140", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000140", "status": "in-use", "user": "خالد الحربي", "central": "سنترال3", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "141", "employeeId": "1141", "type": "tablet", "model": "Nokia T20", "serial": "TA00000141", "status": "maintenance", "user": "علي العتيبي", "central": "سنترال4", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "142", "employeeId": "1142", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000142", "status": "maintenance", "user": "علي الشمري", "central": "سنترال1", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "143", "employeeId": "1143", "type": "tablet", "model": "Nokia T20", "serial": "TA00000143", "status": "in-use", "user": "حسن الحربي", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "144", "employeeId": "1144", "type": "tablet", "model": "Samsung Galaxy Tab S8", "serial": "TA00000144", "status": "maintenance", "user": "سعيد العنزي", "central": "سنترال5", "notes": "تحت الصيانة", "inventoryDone": false, "specs": "" },
+            { "id": "145", "employeeId": "1145", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000145", "status": "in-use", "user": "سعيد المطيري", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "146", "employeeId": "1146", "type": "tablet", "model": "Nokia T20", "serial": "TA00000146", "status": "in-use", "user": "حسن العتيبي", "central": "سنترال6", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "147", "employeeId": "1147", "type": "tablet", "model": "Realme Pad X", "serial": "TA00000147", "status": "in-use", "user": "علي المالكي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "148", "employeeId": "1148", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000148", "status": "in-use", "user": "سالم المالكي", "central": "سنترال5", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "149", "employeeId": "1149", "type": "tablet", "model": "Microsoft Surface Pro 8", "serial": "TA00000149", "status": "in-use", "user": "علي القحطاني", "central": "سنترال4", "notes": "", "inventoryDone": false, "specs": "" },
+            { "id": "150", "employeeId": "1150", "type": "tablet", "model": "Lenovo Tab P12 Pro", "serial": "TA00000150", "status": "in-use", "user": "سعيد العتيبي", "central": "سنترال2", "notes": "", "inventoryDone": false, "specs": "" }
         ];
 
         // --- بداية الكود المعدل ---
@@ -1969,7 +1944,8 @@
 
             // إعادة تعيين Radio Buttons
             document.getElementById('search-inventory').checked = true;
-            toggleSearchSections();
+            document.getElementById('inventory-search-section').classList.remove('hidden');
+            document.getElementById('scrap-search-section').classList.add('hidden');
 
             // تطبيق الفلاتر بعد الإعادة
             initReportsPage();
@@ -1979,22 +1955,13 @@
         // دالة لإظهار/إخفاء أقسام الفلاتر بناءً على الاختيار
         function toggleSearchSections() {
             const searchType = document.querySelector('input[name="searchType"]:checked').value;
-            const sections = {
-                inventory: 'inventory-search-section',
-                scrap: 'scrap-search-section',
-                modify: 'modify-request-section',
-                request_scrap: 'scrap-request-section'
-            };
 
-            // Hide all sections first
-            Object.values(sections).forEach(id => {
-                document.getElementById(id)?.classList.add('hidden');
-            });
-            
-            // Show the selected section
-            const selectedSectionId = sections[searchType];
-            if(selectedSectionId) {
-                document.getElementById(selectedSectionId).classList.remove('hidden');
+            if (searchType === 'inventory') {
+                document.getElementById('inventory-search-section').classList.remove('hidden');
+                document.getElementById('scrap-search-section').classList.add('hidden');
+            } else {
+                document.getElementById('inventory-search-section').classList.add('hidden');
+                document.getElementById('scrap-search-section').classList.remove('hidden');
             }
         }
 
@@ -2239,6 +2206,7 @@
             document.getElementById('addDeviceForm').reset();
         }
 
+        // ==== START: MODIFIED FUNCTION ====
         // عرض نموذج تعديل جهاز
         function showEditDeviceModal(deviceId) {
             currentEditDeviceId = deviceId;
@@ -2247,15 +2215,15 @@
             if (device) {
                 document.getElementById('edit-device-id').value = device.id;
 
-                // تعبئة معلومات العهدة بالترتيب الجديد
+                // تعبئة معلومات العهدة الثابتة
                 document.getElementById('edit-device-type-display').textContent = getDeviceTypeName(device.type);
                 document.getElementById('edit-device-model-display').textContent = device.model;
                 document.getElementById('edit-device-serial-display').textContent = device.serial;
                 document.getElementById('edit-device-user-display').textContent = device.user || '---';
                 document.getElementById('edit-device-specs-display').textContent = device.specs || '---';
                 document.getElementById('edit-device-central-display').textContent = device.central || '---';
-
-                // تحويل الحالة إلى نص
+                
+                // تحويل الحالة إلى نص وعرضها
                 let statusText;
                 switch (device.status) {
                     case 'in-use': statusText = 'مستخدم'; break;
@@ -2264,21 +2232,57 @@
                 }
                 document.getElementById('edit-device-status-display').textContent = statusText;
 
-                // تعبئة حقول التعديل
+                // تعبئة حقول النموذج القابلة للتعديل
                 document.getElementById('edit-device-status').value = device.status;
                 document.getElementById('edit-device-employee-id').value = device.employeeId || '';
                 document.getElementById('edit-device-central').value = device.central || 'سنترال1';
 
+                // التعامل مع حقول المواصفات (الرام والهارد)
+                const specsFields = document.getElementById('edit-specs-fields');
+                const ramSelect = document.getElementById('edit-device-ram');
+                const hddSelect = document.getElementById('edit-device-hdd');
+
+                if (device.type === 'laptop' || device.type === 'desktop') {
+                    specsFields.classList.remove('hidden');
+                    ramSelect.required = true;
+                    hddSelect.required = true;
+
+                    // تحليل المواصفات الحالية وتعيينها
+                    if (device.specs) {
+                         const parts = device.specs.split('|').map(p => p.trim());
+                         const ramPart = parts.find(p => p.startsWith('رام:'));
+                         const hddPart = parts.find(p => p.startsWith('هارد:'));
+                         
+                         const currentRam = ramPart ? ramPart.replace('رام:', '').trim() : '';
+                         const currentHdd = hddPart ? hddPart.replace('هارد:', '').trim() : '';
+
+                         ramSelect.value = currentRam;
+                         hddSelect.value = currentHdd;
+                    } else {
+                         ramSelect.value = '';
+                         hddSelect.value = '';
+                    }
+
+                } else {
+                    specsFields.classList.add('hidden');
+                    ramSelect.required = false;
+                    hddSelect.required = false;
+                }
+
                 document.getElementById('editDeviceModal').classList.remove('hidden');
             }
         }
+        // ==== END: MODIFIED FUNCTION ====
 
-
+        // ==== START: MODIFIED FUNCTION ====
         // إخفاء نموذج تعديل جهاز
         function hideEditDeviceModal() {
             document.getElementById('editDeviceModal').classList.add('hidden');
+            document.getElementById('edit-specs-fields').classList.add('hidden'); // التأكد من إخفاء حقول المواصفات
             document.getElementById('editDeviceForm').reset();
         }
+        // ==== END: MODIFIED FUNCTION ====
+
 
         // --- بداية الكود المعدل ---
         // حذف الجهاز من المخزون مع تحديث التقارير
@@ -2356,7 +2360,6 @@
             // عند فتح قسم التقارير، تحديث المخططات
             if (target === 'reports') {
                 initReportsPage();
-                toggleSearchSections();
             }
         }
 
@@ -2571,31 +2574,6 @@
                 scrapYearSelect.appendChild(option2);
             }
         }
-        
-        function populateDeviceDropdowns() {
-            const selects = [
-                document.getElementById('modify-request-device'),
-                document.getElementById('scrap-request-device')
-            ];
-
-            selects.forEach(select => {
-                if(!select) return;
-                // Clear existing options except the first one
-                while (select.options.length > 1) {
-                    select.remove(1);
-                }
-
-                // Populate with devices
-                devicesData.forEach(device => {
-                    if(device.status !== 'scrapped'){
-                        const option = document.createElement('option');
-                        option.value = device.id;
-                        option.textContent = `${getDeviceTypeName(device.type)} - ${device.serial} (${device.user})`;
-                        select.appendChild(option);
-                    }
-                });
-            });
-        }
 
 
         // =====================
@@ -2610,9 +2588,6 @@
 
             // تعبئة فلاتر السنوات
             populateYearDropdowns();
-            
-            // تعبئة قوائم الأجهزة في نماذج الطلبات
-            populateDeviceDropdowns();
 
             // معالجة النقر على أزرار الجرد
             document.addEventListener('click', function (e) {
@@ -2761,6 +2736,7 @@
             document.getElementById('closeEditDeviceModal').addEventListener('click', hideEditDeviceModal);
             document.getElementById('cancelEditDevice').addEventListener('click', hideEditDeviceModal);
 
+            // ==== START: MODIFIED FUNCTION ====
             // معالجة حفظ التعديلات
             document.getElementById('editDeviceForm').addEventListener('submit', function (e) {
                 e.preventDefault();
@@ -2772,11 +2748,25 @@
 
                 const deviceIndex = devicesData.findIndex(item => item.id === deviceId);
                 if (deviceIndex > -1) {
+                    // تحديث البيانات الأساسية
                     devicesData[deviceIndex].status = newStatus;
                     devicesData[deviceIndex].employeeId = newEmployeeId;
                     devicesData[deviceIndex].central = newCentral;
+
+                    // تحديث المواصفات إذا كان لابتوب أو ديسكتوب
+                    const deviceType = devicesData[deviceIndex].type;
+                    if (deviceType === 'laptop' || deviceType === 'desktop') {
+                         const newRam = document.getElementById('edit-device-ram').value;
+                         const newHdd = document.getElementById('edit-device-hdd').value;
+                         if (newRam && newHdd) {
+                            devicesData[deviceIndex].specs = `رام: ${newRam} | هارد: ${newHdd}`;
+                         } else {
+                            alert('الرجاء تحديد الرام والهارد.');
+                            return; // منع إغلاق النافذة إذا كانت الحقول مطلوبة وفارغة
+                         }
+                    }
+
                     displayInventory();
-                    // Optional: Show a success message
                     alert('تم تحديث بيانات الجهاز بنجاح');
                 } else {
                     alert('خطأ: لم يتم العثور على الجهاز لتحديثه.');
@@ -2784,34 +2774,8 @@
 
                 hideEditDeviceModal();
             });
+            // ==== END: MODIFIED FUNCTION ====
 
-            // --- بداية الكود المضاف ---
-            // معالجة إرسال طلب التعديل
-            document.getElementById('modify-request-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const deviceId = document.getElementById('modify-request-device').value;
-                if (!deviceId) {
-                    alert('الرجاء اختيار جهاز أولاً.');
-                    return;
-                }
-                alert('تم إرسال طلب التعديل بنجاح، ستتم مراجعته من قبل المسؤول.');
-                this.reset();
-                document.getElementById('modify-request-receipt-file-name').value = "لم يتم اختيار ملف";
-            });
-
-            // معالجة إرسال طلب التخريد
-            document.getElementById('scrap-request-form').addEventListener('submit', function (e) {
-                e.preventDefault();
-                const deviceId = document.getElementById('scrap-request-device').value;
-                if (!deviceId) {
-                    alert('الرجاء اختيار جهاز أولاً.');
-                    return;
-                }
-                alert('تم إرسال طلب التخريد بنجاح، ستتم مراجعته من قبل المسؤول.');
-                this.reset();
-                document.getElementById('scrap-request-receipt-file-name').value = "لم يتم اختيار ملف";
-            });
-            // --- نهاية الكود المضاف ---
 
             // معالجة تسجيل الخروج
             document.getElementById('admin-logout-btn').addEventListener('click', function () {
@@ -2824,14 +2788,6 @@
             document.getElementById('receipt-upload').addEventListener('change', function (e) {
                 const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
                 document.getElementById('receipt-file-name').value = fileName;
-            });
-             document.getElementById('modify-request-receipt-upload').addEventListener('change', function(e) {
-                const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
-                document.getElementById('modify-request-receipt-file-name').value = fileName;
-            });
-            document.getElementById('scrap-request-receipt-upload').addEventListener('change', function(e) {
-                const fileName = e.target.files[0] ? e.target.files[0].name : 'لم يتم اختيار ملف';
-                document.getElementById('scrap-request-receipt-file-name').value = fileName;
             });
 
             // ================================================
@@ -2921,7 +2877,7 @@
             document.querySelectorAll('input[name="searchType"]').forEach(radio => {
                 radio.addEventListener('change', function () {
                     toggleSearchSections();
-                    applyReportFilters(); // Optional: re-apply filters on section change
+                    applyReportFilters();
                 });
             });
 
@@ -2931,7 +2887,6 @@
 
             // تهيئة قسم التقارير
             initReportsPage();
-             toggleSearchSections();
 
             // أحداث الجرس والإشعارات
             document.getElementById('notification-btn').addEventListener('click', function () {
